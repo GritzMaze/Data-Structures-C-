@@ -8,7 +8,7 @@ set(SOURCES
 	interface.h
 	tests.cpp
 
-	implementation.cpp
+	myStore.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
@@ -16,7 +16,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 add_executable(main
 				main.cpp
 				interface.h
-				implementation.cpp
+				myStore.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE /common)

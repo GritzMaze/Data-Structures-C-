@@ -1,18 +1,25 @@
+#pragma once
+
 #include "interface.h"
+#include "consoleLogger.h"
 
-/// This is sample empty implementation you can place your solution here or delete this and include tests to your solution
+class MyStore : public Store {
 
-
-struct MyStore : public Store {
-
+	private:
 	int bananas;
 	int schweppes;
 	int workers;
 
 	ActionHandler *actionHandler = nullptr;
+	ConsoleLogger *consoleLogger = nullptr;
 
+	public:
 	void setActionHandler(ActionHandler *handler) override {
 		actionHandler = handler;
+	}
+
+	void setConsoleLogger(ConsoleLogger *logger) {
+		consoleLogger = logger;
 	}
 
 	void init(int workerCount, int startBanana, int startSchweppes) override {
@@ -37,7 +44,3 @@ struct MyStore : public Store {
 		return this->schweppes;
 	}
 };
-
-Store *createStore() {
-	return new MyStore();
-}
