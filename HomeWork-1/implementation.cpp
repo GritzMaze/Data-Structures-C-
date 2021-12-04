@@ -4,6 +4,11 @@
 
 
 struct MyStore : public Store {
+
+	int bananas;
+	int schweppes;
+	int workers;
+
 	ActionHandler *actionHandler = nullptr;
 
 	void setActionHandler(ActionHandler *handler) override {
@@ -25,11 +30,11 @@ struct MyStore : public Store {
 	}
 
 	virtual int getBanana() const {
-		return 0;
+		return this->bananas;
 	}
 
 	virtual int getSchweppes() const {
-		return 0;
+		return this->schweppes;
 	}
 };
 
