@@ -9,11 +9,16 @@ class MyStore : public Store {
 	int bananas;
 	int schweppes;
 	int workers;
+    int index;
 
 	ActionHandler *actionHandler = nullptr;
 	ConsoleLogger *consoleLogger = nullptr;
 
 	public:
+    MyStore();
+    ~MyStore();
+
+
 	void setActionHandler(ActionHandler *handler) override {
 		actionHandler = handler;
 	}
@@ -22,25 +27,11 @@ class MyStore : public Store {
 		consoleLogger = logger;
 	}
 
-	void init(int workerCount, int startBanana, int startSchweppes) override {
-		
-	}
+	void init(int workerCount, int startBanana, int startSchweppes) override;
+	void addClients(const Client *clients, int count) override;
+	void advanceTo(int minute) override;
 
-	void addClients(const Client *clients, int count) override {
-		
-	}
+	virtual int getBanana() const;
 
-	void advanceTo(int minute) override {
-		actionHandler->onWorkerSend(0, ResourceType::banana);
-		actionHandler->onWorkerBack(0, ResourceType::schweppes);
-		actionHandler->onClientDepart(0, 0, 1, 2);
-	}
-
-	virtual int getBanana() const {
-		return this->bananas;
-	}
-
-	virtual int getSchweppes() const {
-		return this->schweppes;
-	}
+	virtual int getSchweppes() const;
 };
