@@ -1,7 +1,11 @@
 #pragma once
 
+#include <vector>
 #include "interface.h"
 #include "consoleLogger.h"
+#include "MyClient.h"
+#include "priorityQueue.h"
+#include "event.h"
 
 class MyStore : public Store {
 
@@ -10,9 +14,15 @@ class MyStore : public Store {
 	int schweppes;
 	int workers;
     int index;
+	int minute = 0;
+	bool isWorkerGoingBanana;
+	bool isWorkerGoingSchweppes;
+	// PriorityQueue<MyClient> clients;
+	PriorityQueue<Event> events;
+	MyClient current;
 
 	ActionHandler *actionHandler = nullptr;
-	ConsoleLogger *consoleLogger = nullptr;
+	ConsoleLogger *consoleLogger = new ConsoleLogger();
 
 	public:
     MyStore();
@@ -20,16 +30,20 @@ class MyStore : public Store {
 
 
 	void setActionHandler(ActionHandler *handler) override {
-		actionHandler = handler;
-	}
-
-	void setConsoleLogger(ConsoleLogger *logger) {
-		consoleLogger = logger;
+		//actionHandler = handler;
 	}
 
 	void init(int workerCount, int startBanana, int startSchweppes) override;
 	void addClients(const Client *clients, int count) override;
 	void advanceTo(int minute) override;
+	void service(MyClient&);
+	bool need(int&, int&);
+	void needForce(int&, int&);
+	void updateStock(const ResourceType);
+	
+	void sendWorker(const ResourceType);
+	void workerBack(const ResourceType);
+	void clientDepart(const MyClient&);
 
 	virtual int getBanana() const;
 
