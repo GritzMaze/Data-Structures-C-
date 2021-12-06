@@ -5,7 +5,8 @@
 struct Event {
 
     enum Type {
-        WorkerSend, WorkerBack, ClientDepart, ClientArrive, MaxTimeReached, Skip
+        WorkerSend, WorkerBack, ClientDepart,
+        ClientArrive, MaxTimeReached, Skip, CheckAgain
     };
 
     struct Worker {

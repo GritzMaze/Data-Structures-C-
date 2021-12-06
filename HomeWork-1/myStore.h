@@ -14,11 +14,12 @@ class MyStore : public Store {
 	int schweppes;
 	int workers;
     int index;
+	int currentIndex;
 	int minute = 0;
 	bool isWorkerGoingBanana;
 	bool isWorkerGoingSchweppes;
-	// PriorityQueue<MyClient> clients;
-	PriorityQueue<Event> events;
+	PriorityQueue<Event*> events;
+	PriorityQueue<int> nextWorkerBack;
 	MyClient current;
 
 	ActionHandler *actionHandler = nullptr;
@@ -30,7 +31,7 @@ class MyStore : public Store {
 
 
 	void setActionHandler(ActionHandler *handler) override {
-		//actionHandler = handler;
+		actionHandler = handler;
 	}
 
 	void init(int workerCount, int startBanana, int startSchweppes) override;
