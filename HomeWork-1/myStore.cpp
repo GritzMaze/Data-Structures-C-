@@ -38,7 +38,7 @@ void MyStore::advanceTo(int minute)
 	{
 		Event *temp = events.dequeue();
 		this->minute = temp->minute;
-		if (temp->type == Event::ClientArrive || temp->type == Event::MaxTimeReached || temp->type == Event::CheckAgain)
+		if (temp->type == Event::ClientArrive || temp->type == Event::CheckAgain)
 		{
 
 			if (checkForPastClients(temp->client.index))
@@ -50,37 +50,35 @@ void MyStore::advanceTo(int minute)
 		{
 			workerBack(temp->worker.resource);
 		}
+		else if (temp->type == Event::MaxTimeReached)
+		{
+			if (checkForPastClients(temp->client.index))
+				continue;
+			needForce(temp->client.banana, temp->client.schweppes);
+			this->clientDepart(temp->client);
+		}
 	}
 }
 
 void MyStore::service(MyClient &client)
 {
-	int maxWaitTimeMin = client.maxWaitTimeMin;
-	if (maxWaitTimeMin <= this->minute)
+	if (need(client.banana, client.schweppes))
 	{
-		needForce(client.banana, client.schweppes);
 		this->clientDepart(client);
 	}
 	else
 	{
-		if (need(client.banana, client.schweppes))
+		//push after the closest workerback event
+		if (!nextWorkerBack.isEmpty())
 		{
-			this->clientDepart(client);
-		}
-		else
-		{
-			//push after the closest workerback event
-			if (!nextWorkerBack.isEmpty())
+			bool waitingTime = nextWorkerBack.first() <= client.maxWaitTimeMin;
+			if (waitingTime)
 			{
-				bool waitingTime = nextWorkerBack.first() <= client.maxWaitTimeMin;
-				if (waitingTime)
-				{
-					Event *ev = new Event();
-					ev->type = Event::CheckAgain;
-					ev->minute = nextWorkerBack.first();
-					ev->client = client;
-					events.enqueue(ev, ev->minute);
-				}
+				Event *ev = new Event();
+				ev->type = Event::CheckAgain;
+				ev->minute = nextWorkerBack.first();
+				ev->client = client;
+				events.enqueue(ev, ev->minute + 12);
 			}
 		}
 	}
@@ -124,7 +122,7 @@ bool MyStore::need(int &bananas, int &schweppes)
 		}
 		else if (schweppes > 0 && !isWorkerGoingSchweppes)
 		{
-			sendWorker(ResourceType::schweppes);
+			sendWorker(ResourceType::schweppes); ////sendworker(type, how many workers needed)
 			isWorkerGoingSchweppes = true;
 			return false;
 		}
@@ -137,11 +135,6 @@ void MyStore::needForce(int &bananas, int &schweppes)
 {
 	if (bananas > this->bananas)
 	{
-		if (!isWorkerGoingBanana)
-		{
-			sendWorker(ResourceType::banana); //sendworker(type, how many workers needed)
-			isWorkerGoingSchweppes = true;
-		}
 		bananas = this->bananas;
 		this->bananas = 0;
 	}
@@ -152,11 +145,6 @@ void MyStore::needForce(int &bananas, int &schweppes)
 
 	if (schweppes > this->schweppes)
 	{
-		if (!isWorkerGoingSchweppes)
-		{
-			sendWorker(ResourceType::schweppes);
-			isWorkerGoingSchweppes = true;
-		}
 		schweppes = this->schweppes;
 		this->schweppes = 0;
 	}
@@ -183,14 +171,14 @@ void MyStore::addClients(const Client *clients, int count = 1)
 		ev1->minute = temp.arriveMinute;
 		ev1->client = temp;
 
-		this->events.enqueue(ev1, ev1->minute);
+		this->events.enqueue(ev1, ev1->minute + 10);
 
 		Event *ev2 = new Event();
 		ev2->type = Event::MaxTimeReached;
 		ev2->minute = temp.maxWaitTimeMin;
 		ev2->client = temp;
 
-		this->events.enqueue(ev2, ev2->minute);
+		this->events.enqueue(ev2, ev2->minute + 12);
 		counter++;
 	}
 }
@@ -217,7 +205,7 @@ void MyStore::sendWorker(const ResourceType type)
 		ev->type = Event::WorkerBack;
 		ev->minute = this->minute + 60;
 		ev->worker.resource = type;
-		events.enqueue(ev, ev->minute);
+		events.enqueue(ev, ev->minute + 11);
 
 		this->workers--;
 
@@ -249,9 +237,12 @@ void MyStore::clientDepart(const MyClient &client)
 	consoleLogger->onClientDepart(client.index, this->minute, client.banana, client.schweppes);
 }
 
-bool MyStore::checkForPastClients(const size_t& clientIndex) {
-	for(int &index : pastClients) {
-		if(index == clientIndex) {
+bool MyStore::checkForPastClients(const size_t &clientIndex)
+{
+	for (int &index : pastClients)
+	{
+		if (index == clientIndex)
+		{
 			return true;
 		}
 	}

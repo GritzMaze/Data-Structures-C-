@@ -29,28 +29,28 @@ int main(int, char**) {
 
     // LAST TEST CASE
 
-    MyStore store;
-    store.init(2, 10, 0);
-    Client client1{0, 10, 10, 20};
-    Client client2{10, 10, 0, 0};
-    store.addClients(&client1, 1);
-    store.addClients(&client2, 1);
-    store.advanceTo(0);
-    store.advanceTo(10);
-    store.advanceTo(20);
-
-
     // MyStore store;
-    // Client client1{0,10,0 ,10};
-    // Client client2{45,35,0,30};
-    // Client client3{46,30,20,100};
-    // Client client4{200,10,10,1};
-
-    // store.init(5, 0, 0);
+    // store.init(2, 10, 0);
+    // Client client1{0, 10, 10, 20};
+    // Client client2{10, 10, 0, 0};
     // store.addClients(&client1, 1);
     // store.addClients(&client2, 1);
-    // store.addClients(&client3, 1);
-    // store.addClients(&client4, 1);
-    // store.advanceTo(1000);
+    // store.advanceTo(0);
+    // store.advanceTo(10);
+    // store.advanceTo(20);
+
+
+    MyStore store;
+    Client client1{0,10,0 ,10};
+    Client client2{45,35,0,30};
+    Client client3{46,30,20,100};
+    Client client4{200,10,10,1};
+
+    store.init(5, 0, 0);
+    store.addClients(&client1, 1);
+    store.addClients(&client2, 1);
+    store.addClients(&client3, 1);
+    store.addClients(&client4, 1);
+    store.advanceTo(1000);
     return 0;
 }
