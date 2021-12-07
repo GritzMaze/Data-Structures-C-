@@ -20,7 +20,7 @@ class MyStore : public Store {
 	bool isWorkerGoingSchweppes;
 	PriorityQueue<Event*> events;
 	PriorityQueue<int> nextWorkerBack;
-	MyClient current;
+	std::vector<int> pastClients;
 
 	ActionHandler *actionHandler = nullptr;
 	ConsoleLogger *consoleLogger = new ConsoleLogger();
@@ -46,6 +46,8 @@ class MyStore : public Store {
 	void workerBack(const ResourceType);
 	void clientDepart(const MyClient&);
 
+
+	bool checkForPastClients(const size_t&);
 	virtual int getBanana() const;
 
 	virtual int getSchweppes() const;

@@ -41,7 +41,7 @@ void MyStore::advanceTo(int minute)
 		if (temp->type == Event::ClientArrive || temp->type == Event::MaxTimeReached || temp->type == Event::CheckAgain)
 		{
 
-			if (this->currentIndex > temp->client.index)
+			if (checkForPastClients(temp->client.index))
 				continue;
 
 			this->service(temp->client);
@@ -139,7 +139,7 @@ void MyStore::needForce(int &bananas, int &schweppes)
 	{
 		if (!isWorkerGoingBanana)
 		{
-			sendWorker(ResourceType::banana);
+			sendWorker(ResourceType::banana); //sendworker(type, how many workers needed)
 			isWorkerGoingSchweppes = true;
 		}
 		bananas = this->bananas;
@@ -243,10 +243,19 @@ void MyStore::workerBack(const ResourceType type)
 
 void MyStore::clientDepart(const MyClient &client)
 {
-	this->currentIndex++;
+	pastClients.push_back(client.index);
 	if (actionHandler)
 		actionHandler->onClientDepart(client.index, this->minute, client.banana, client.schweppes);
 	consoleLogger->onClientDepart(client.index, this->minute, client.banana, client.schweppes);
+}
+
+bool MyStore::checkForPastClients(const size_t& clientIndex) {
+	for(int &index : pastClients) {
+		if(index == clientIndex) {
+			return true;
+		}
+	}
+	return false;
 }
 
 int MyStore::getBanana() const
