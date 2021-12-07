@@ -2,7 +2,8 @@
 #include "../headers/consoleLogger.h"
 #include "../headers/myStore.h"
 
-MyStore::MyStore() {
+MyStore::MyStore()
+{
 	this->bananas = 0;
 	this->schweppes = 0;
 	this->workers = 0;
@@ -32,13 +33,47 @@ MyStore::~MyStore()
 
 void MyStore::init(int workerCount, int startBanana, int startSchweppes)
 {
+	if (workerCount < 0 || startBanana < 0 || startSchweppes < 0)
+	{
+		throw std::out_of_range("Negative value");
+	}
 	this->bananas = startBanana;
 	this->schweppes = startSchweppes;
 	this->workers = workerCount;
 }
 
+void MyStore::advance()
+{
+	while (!events.isEmpty())
+	{
+		Event *temp = events.dequeue();
+		this->minute = temp->minute;
+		if (temp->type == Event::ClientArrive || temp->type == Event::CheckAgain)
+		{
+
+			if (checkForPastClients(temp->client.index))
+				continue;
+
+			this->service(temp->client);
+		}
+		else if (temp->type == Event::WorkerBack)
+		{
+			workerBack(temp->worker.resource);
+		}
+		else if (temp->type == Event::MaxTimeReached)
+		{
+			if (checkForPastClients(temp->client.index))
+				continue;
+			needForce(temp->client.banana, temp->client.schweppes);
+			this->clientDepart(temp->client);
+		}
+	}
+}
+
 void MyStore::advanceTo(int minute)
 {
+	if(minute < this->minute)
+		throw std::out_of_range("Invalid input");
 	while (!events.isEmpty() && events.first()->minute <= minute)
 	{
 		Event *temp = events.dequeue();
@@ -106,14 +141,14 @@ bool MyStore::need(int &bananas, int &schweppes)
 		{
 			if (this->bananas + bananas >= this->schweppes + schweppes)
 			{
-					sendWorker(ResourceType::banana, ((bananas - (this->bananas + bananasComing))/RESTOCK_AMOUNT) + 1);
-					return false;
+				sendWorker(ResourceType::banana, ((bananas - (this->bananas + bananasComing)) / RESTOCK_AMOUNT) + 1);
+				return false;
 			}
 		}
 		if (!(this->schweppes + schweppesComing >= schweppes))
 		{
-					sendWorker(ResourceType::schweppes, ((schweppes - (this->schweppes + schweppesComing))/RESTOCK_AMOUNT) + 1);
-					return false;
+			sendWorker(ResourceType::schweppes, ((schweppes - (this->schweppes + schweppesComing)) / RESTOCK_AMOUNT) + 1);
+			return false;
 		}
 	}
 	return false;
@@ -153,6 +188,11 @@ void MyStore::addClients(const Client *clients, int count = 1)
 		temp.schweppes = (*(clients + counter)).schweppes;
 		temp.maxWaitTimeMin = temp.arriveMinute + (*(clients + counter)).maxWaitTime;
 		temp.index = index++;
+
+		if(temp.arriveMinute < 0 || temp.banana < 0 || temp.schweppes < 0 || temp.maxWaitTimeMin < 0)
+		{
+			throw std::out_of_range("Negative value");
+		}
 
 		Event *ev1 = new Event();
 		ev1->type = Event::ClientArrive;

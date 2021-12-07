@@ -447,6 +447,3 @@ TEST_CASE("Client sents workers, he comebacks, then client depart at max time") 
 		REQUIRE(LastEvent().client.banana == 100);
 	}
 }
-
-
-

@@ -1,11 +1,13 @@
 #pragma once
 
 #include <vector>
+#include <stdexcept>
 #include "interface.h"
 #include "consoleLogger.h"
-#include "MyClient.h"
+#include "myClient.h"
 #include "priorityQueue.h"
 #include "event.h"
+
 
 const int RESTOCK_TIME = 60;
 const int RESTOCK_AMOUNT = 100;
@@ -40,6 +42,7 @@ class MyStore : public Store {
 	void init(int workerCount, int startBanana, int startSchweppes) override;
 	void addClients(const Client *clients, int count) override;
 	void advanceTo(int minute) override;
+	void advance();
 	void service(MyClient&);
 	bool need(int&, int&);
 	void needForce(int&, int&);
@@ -51,7 +54,7 @@ class MyStore : public Store {
 
 
 	bool checkForPastClients(const size_t&);
-	virtual int getBanana() const;
+	virtual int getBanana() const override;
 
-	virtual int getSchweppes() const;
+	virtual int getSchweppes() const override;
 };
