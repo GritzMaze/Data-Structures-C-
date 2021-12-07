@@ -7,5 +7,4 @@ struct MyClient {
     int schweppes;
     int maxWaitTimeMin;
     int index;
-    bool isDeparted = false;
 };

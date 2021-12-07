@@ -7,6 +7,9 @@
 #include "priorityQueue.h"
 #include "event.h"
 
+const int RESTOCK_TIME = 60;
+const int RESTOCK_AMOUNT = 100;
+
 class MyStore : public Store {
 
 	private:
@@ -15,15 +18,15 @@ class MyStore : public Store {
 	int workers;
     int index;
 	int currentIndex;
-	int minute = 0;
-	bool isWorkerGoingBanana;
-	bool isWorkerGoingSchweppes;
+	int minute;
+	size_t workersGoingBanana;
+	size_t workersGoingSchweppes;
 	PriorityQueue<Event*> events;
 	PriorityQueue<int> nextWorkerBack;
 	std::vector<int> pastClients;
 
 	ActionHandler *actionHandler = nullptr;
-	ConsoleLogger *consoleLogger = new ConsoleLogger();
+	ConsoleLogger *consoleLogger;
 
 	public:
     MyStore();
@@ -42,7 +45,7 @@ class MyStore : public Store {
 	void needForce(int&, int&);
 	void updateStock(const ResourceType);
 	
-	void sendWorker(const ResourceType);
+	void sendWorker(const ResourceType, size_t);
 	void workerBack(const ResourceType);
 	void clientDepart(const MyClient&);
 

@@ -411,3 +411,42 @@ TEST_CASE("Clients arrive/depart in mixed order") {
 		REQUIRE(LastEvent().client.index == 0);
 	}
 }
+
+// New Tests
+
+TEST_CASE("Client sents workers, he comebacks, then client depart at max time") {
+	TestStore store;
+	store.init(1, 0, 0);
+
+	store.addClients(Client{0, 110, 0, 130});
+
+	SECTION("The worker must be sent") {
+		store.advanceTo(0);
+
+		INFO("The worker is sent");
+		REQUIRE(store.log.size() == 1);
+		REQUIRE(LastEvent().type == StoreEvent::WorkerSend);
+		REQUIRE(LastEvent().worker.resource == ResourceType::banana);
+	}
+
+	SECTION("The worker comeback") {
+		store.advanceTo(60);
+
+		INFO("The worker comeback");
+		REQUIRE(store.log.size() == 2);
+		REQUIRE(LastEvent().type == StoreEvent::WorkerBack);
+		REQUIRE(LastEvent().worker.resource == ResourceType::banana);
+	}
+
+	SECTION("The client depart") {
+		store.advanceTo(130);
+
+		INFO("The client depart");
+		REQUIRE(store.log.size() == 3);
+		REQUIRE(LastEvent().type == StoreEvent::ClientDepart);
+		REQUIRE(LastEvent().client.banana == 100);
+	}
+}
+
+
+

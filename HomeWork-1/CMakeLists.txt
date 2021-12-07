@@ -12,6 +12,9 @@ set(SOURCES
 	tests.cpp
 
 	myStore.cpp
+	event.h
+	priorityQueue.h
+
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
@@ -20,6 +23,8 @@ add_executable(main
 				main.cpp
 				interface.h
 				myStore.cpp
+				event.h
+				priorityQueue.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE /common)

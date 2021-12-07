@@ -2,13 +2,16 @@
 #include "consoleLogger.h"
 #include "myStore.h"
 
-MyStore::MyStore()
-{
+MyStore::MyStore() {
 	this->bananas = 0;
 	this->schweppes = 0;
 	this->workers = 0;
 	this->index = 0;
+	this->minute = 0;
 	this->currentIndex = 0;
+	this->workersGoingBanana = 0;
+	this->workersGoingSchweppes = 0;
+	this->consoleLogger = new ConsoleLogger();
 }
 
 MyStore::~MyStore()
@@ -17,6 +20,12 @@ MyStore::~MyStore()
 	this->schweppes = 0;
 	this->workers = 0;
 	this->index = 0;
+	this->minute = 0;
+	this->currentIndex = 0;
+	this->workersGoingBanana = 0;
+	this->workersGoingSchweppes = 0;
+
+	delete this->consoleLogger;
 	actionHandler = nullptr;
 	consoleLogger = nullptr;
 }
@@ -30,10 +39,6 @@ void MyStore::init(int workerCount, int startBanana, int startSchweppes)
 
 void MyStore::advanceTo(int minute)
 {
-	// TO-DO
-	// Throws exceptions
-	// Rewrite
-	// Also wait for previous customer to get away
 	while (!events.isEmpty() && events.first()->minute <= minute)
 	{
 		Event *temp = events.dequeue();
@@ -88,6 +93,8 @@ void MyStore::service(MyClient &client)
 // Rewrite (Not working properly)
 bool MyStore::need(int &bananas, int &schweppes)
 {
+	int bananasComing = this->workersGoingBanana * RESTOCK_AMOUNT;
+	int schweppesComing = this->workersGoingSchweppes * RESTOCK_AMOUNT;
 	if (bananas <= this->bananas && schweppes <= this->schweppes)
 	{
 		this->needForce(bananas, schweppes);
@@ -95,40 +102,21 @@ bool MyStore::need(int &bananas, int &schweppes)
 	}
 	else
 	{
-		if (bananas > 0 && !isWorkerGoingBanana)
+		if (!(this->bananas + bananasComing >= bananas))
 		{
-			if (bananas > this->bananas)
+			if (this->bananas + bananas >= this->schweppes + schweppes)
 			{
-				// if (this->bananas + bananas >= this->schweppes + schweppes)
-				// {
-				sendWorker(ResourceType::banana);
-				isWorkerGoingBanana = true;
-				return false;
-				// }
-				// else
-				// {
-				// 	sendWorker(ResourceType::schweppes);
-				// 	return false;
-				// }
-			}
-			else
-			{
-				if (isWorkerGoingSchweppes)
+					sendWorker(ResourceType::banana, ((bananas - (this->bananas + bananasComing))/RESTOCK_AMOUNT) + 1);
 					return false;
-				sendWorker(ResourceType::schweppes);
-				isWorkerGoingSchweppes = true;
-				return false;
 			}
 		}
-		else if (schweppes > 0 && !isWorkerGoingSchweppes)
+		if (!(this->schweppes + schweppesComing >= schweppes))
 		{
-			sendWorker(ResourceType::schweppes); ////sendworker(type, how many workers needed)
-			isWorkerGoingSchweppes = true;
-			return false;
+					sendWorker(ResourceType::schweppes, ((schweppes - (this->schweppes + schweppesComing))/RESTOCK_AMOUNT) + 1);
+					return false;
 		}
-		else
-			return false;
 	}
+	return false;
 }
 
 void MyStore::needForce(int &bananas, int &schweppes)
@@ -187,28 +175,30 @@ void MyStore::updateStock(const ResourceType type)
 {
 	if (type == ResourceType::banana)
 	{
-		this->bananas += 100;
-		isWorkerGoingBanana = false;
+		this->bananas += RESTOCK_AMOUNT;
 	}
 	else
 	{
-		this->schweppes += 100;
-		isWorkerGoingSchweppes = false;
+		this->schweppes += RESTOCK_AMOUNT;
 	}
 }
 
-void MyStore::sendWorker(const ResourceType type)
+void MyStore::sendWorker(const ResourceType type, size_t workersNeeded)
 {
-	if (this->workers > 0)
+
+	while (this->workers > 0 && workersNeeded > 0)
 	{
 		Event *ev = new Event();
 		ev->type = Event::WorkerBack;
-		ev->minute = this->minute + 60;
+		ev->minute = this->minute + RESTOCK_TIME;
 		ev->worker.resource = type;
-		events.enqueue(ev, ev->minute + 11);
-
+		this->events.enqueue(ev, ev->minute + 11);
 		this->workers--;
-
+		workersNeeded--;
+		if (type == ResourceType::banana)
+			workersGoingBanana++;
+		else
+			workersGoingSchweppes++;
 		nextWorkerBack.enqueue(ev->minute, 0);
 
 		if (actionHandler)
@@ -224,6 +214,7 @@ void MyStore::workerBack(const ResourceType type)
 	nextWorkerBack.dequeue();
 
 	updateStock(type);
+
 	if (actionHandler)
 		actionHandler->onWorkerBack(this->minute, type);
 	consoleLogger->onWorkerBack(this->minute, type);
@@ -232,6 +223,7 @@ void MyStore::workerBack(const ResourceType type)
 void MyStore::clientDepart(const MyClient &client)
 {
 	pastClients.push_back(client.index);
+
 	if (actionHandler)
 		actionHandler->onClientDepart(client.index, this->minute, client.banana, client.schweppes);
 	consoleLogger->onClientDepart(client.index, this->minute, client.banana, client.schweppes);
