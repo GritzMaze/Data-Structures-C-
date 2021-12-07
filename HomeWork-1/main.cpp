@@ -1,6 +1,6 @@
 #include <iostream>
-#include "priorityQueue.h"
-#include "myStore.h"
+#include "headers/priorityQueue.h"
+#include "headers/myStore.h"
 
 int main(int, char**) {
     //  PriorityQueue<int> temp;

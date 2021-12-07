@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN
 
-#include "interface.h"
-#include "common/catch.hpp"
+#include "../headers/interface.h"
+#include "../common/catch.hpp"
 
 #include <vector>
 

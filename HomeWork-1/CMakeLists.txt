@@ -8,12 +8,12 @@ project(tests)
 set(SOURCES
 	common/catch.hpp
 
-	interface.h
-	tests.cpp
+	headers/interface.h
+	source/tests.cpp
 
-	myStore.cpp
-	event.h
-	priorityQueue.h
+	source/myStore.cpp
+	headers/event.h
+	headers/priorityQueue.h
 
 )
 
@@ -21,10 +21,10 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 add_executable(main
 				main.cpp
-				interface.h
-				myStore.cpp
-				event.h
-				priorityQueue.h
+				headers/interface.h
+				source/myStore.cpp
+				headers/event.h
+				headers/priorityQueue.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE /common)

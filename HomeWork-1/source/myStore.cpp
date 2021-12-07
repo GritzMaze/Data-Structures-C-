@@ -1,6 +1,6 @@
-#include "interface.h"
-#include "consoleLogger.h"
-#include "myStore.h"
+#include "../headers/interface.h"
+#include "../headers/consoleLogger.h"
+#include "../headers/myStore.h"
 
 MyStore::MyStore() {
 	this->bananas = 0;
