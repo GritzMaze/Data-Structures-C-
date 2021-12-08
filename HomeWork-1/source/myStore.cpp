@@ -9,7 +9,6 @@ MyStore::MyStore()
 	this->workers = 0;
 	this->index = 0;
 	this->minute = 0;
-	this->currentIndex = 0;
 	this->workersGoingBanana = 0;
 	this->workersGoingSchweppes = 0;
 	this->consoleLogger = new ConsoleLogger();
@@ -22,7 +21,6 @@ MyStore::~MyStore()
 	this->workers = 0;
 	this->index = 0;
 	this->minute = 0;
-	this->currentIndex = 0;
 	this->workersGoingBanana = 0;
 	this->workersGoingSchweppes = 0;
 
@@ -30,6 +28,8 @@ MyStore::~MyStore()
 	actionHandler = nullptr;
 	consoleLogger = nullptr;
 }
+
+/// Initialize the store
 
 void MyStore::init(int workerCount, int startBanana, int startSchweppes)
 {
@@ -41,6 +41,8 @@ void MyStore::init(int workerCount, int startBanana, int startSchweppes)
 	this->schweppes = startSchweppes;
 	this->workers = workerCount;
 }
+
+/// Cycle through the whole application
 
 void MyStore::advance()
 {
@@ -70,10 +72,15 @@ void MyStore::advance()
 	}
 }
 
+/// Goes to @minute and does all the action to this minute
+
 void MyStore::advanceTo(int minute)
 {
+	/// if we move back in time
 	if(minute < this->minute)
 		throw std::out_of_range("Invalid input");
+
+		/// while there are events left
 	while (!events.isEmpty() && events.first()->minute <= minute)
 	{
 		Event *temp = events.dequeue();
@@ -100,15 +107,18 @@ void MyStore::advanceTo(int minute)
 	}
 }
 
+/// Service a client
+
 void MyStore::service(MyClient &client)
 {
+	///if the store has what the client wants, he takes it and leave
 	if (need(client.banana, client.schweppes))
 	{
 		this->clientDepart(client);
 	}
 	else
 	{
-		//push after the closest workerback event
+		/// push after the closest workerback event
 		if (!nextWorkerBack.isEmpty())
 		{
 			bool waitingTime = nextWorkerBack.first() <= client.maxWaitTimeMin;
@@ -124,12 +134,14 @@ void MyStore::service(MyClient &client)
 	}
 }
 
-// TO-DO
-// Rewrite (Not working properly)
+/// Checks if clients need anything, then determine what worker should be sent
+
 bool MyStore::need(int &bananas, int &schweppes)
 {
 	int bananasComing = this->workersGoingBanana * RESTOCK_AMOUNT;
 	int schweppesComing = this->workersGoingSchweppes * RESTOCK_AMOUNT;
+
+	/// IF the store has what the client wants
 	if (bananas <= this->bananas && schweppes <= this->schweppes)
 	{
 		this->needForce(bananas, schweppes);
@@ -137,22 +149,33 @@ bool MyStore::need(int &bananas, int &schweppes)
 	}
 	else
 	{
+		/// Do we need bananas
 		if (!(this->bananas + bananasComing >= bananas))
 		{
+			/// Do we need bananas more than schweppes
 			if (this->bananas + bananas >= this->schweppes + schweppes)
 			{
-				sendWorker(ResourceType::banana, ((bananas - (this->bananas + bananasComing)) / RESTOCK_AMOUNT) + 1);
+				/// Determines how many workers we need
+				float workersNeeded = (bananas - (this->schweppes - schweppes)) / RESTOCK_AMOUNT;
+				int workersNeededInt = (std::truncf(workersNeeded) ? (int)workersNeeded : (int)workersNeeded + 1);
+				sendWorker(ResourceType::banana, workersNeededInt);
 				return false;
 			}
 		}
+		
+		/// Do we need schweppes
 		if (!(this->schweppes + schweppesComing >= schweppes))
 		{
-			sendWorker(ResourceType::schweppes, ((schweppes - (this->schweppes + schweppesComing)) / RESTOCK_AMOUNT) + 1);
+			float workersNeeded = (schweppes - (this->schweppes - schweppes)) / RESTOCK_AMOUNT;
+			int workersNeededInt = (std::truncf(workersNeeded) ? (int)workersNeeded : (int)workersNeeded + 1);
+			sendWorker(ResourceType::schweppes, workersNeededInt);
 			return false;
 		}
 	}
 	return false;
 }
+
+/// Client takes whats available
 
 void MyStore::needForce(int &bananas, int &schweppes)
 {
@@ -177,6 +200,8 @@ void MyStore::needForce(int &bananas, int &schweppes)
 	}
 }
 
+/// Adding clients to the store
+
 void MyStore::addClients(const Client *clients, int count = 1)
 {
 	int counter = 0;
@@ -194,6 +219,7 @@ void MyStore::addClients(const Client *clients, int count = 1)
 			throw std::out_of_range("Negative value");
 		}
 
+		/// Creating event for client arrival
 		Event *ev1 = new Event();
 		ev1->type = Event::ClientArrive;
 		ev1->minute = temp.arriveMinute;
@@ -201,6 +227,7 @@ void MyStore::addClients(const Client *clients, int count = 1)
 
 		this->events.enqueue(ev1, ev1->minute + 10);
 
+		/// Creating event for client max wait time
 		Event *ev2 = new Event();
 		ev2->type = Event::MaxTimeReached;
 		ev2->minute = temp.maxWaitTimeMin;
@@ -210,6 +237,9 @@ void MyStore::addClients(const Client *clients, int count = 1)
 		counter++;
 	}
 }
+
+
+/// Updating the resources in the store
 
 void MyStore::updateStock(const ResourceType type)
 {
@@ -223,11 +253,15 @@ void MyStore::updateStock(const ResourceType type)
 	}
 }
 
+/// Sending a worker for resource
+
 void MyStore::sendWorker(const ResourceType type, size_t workersNeeded)
 {
 
+	/// While available workers and needed workers
 	while (this->workers > 0 && workersNeeded > 0)
 	{
+		/// Creating event for when a worker comes back
 		Event *ev = new Event();
 		ev->type = Event::WorkerBack;
 		ev->minute = this->minute + RESTOCK_TIME;
@@ -247,6 +281,8 @@ void MyStore::sendWorker(const ResourceType type, size_t workersNeeded)
 	}
 }
 
+/// When a worker comes back
+
 void MyStore::workerBack(const ResourceType type)
 {
 	this->workers++;
@@ -260,6 +296,8 @@ void MyStore::workerBack(const ResourceType type)
 	consoleLogger->onWorkerBack(this->minute, type);
 }
 
+/// When a client departs
+
 void MyStore::clientDepart(const MyClient &client)
 {
 	pastClients.push_back(client.index);
@@ -268,6 +306,8 @@ void MyStore::clientDepart(const MyClient &client)
 		actionHandler->onClientDepart(client.index, this->minute, client.banana, client.schweppes);
 	consoleLogger->onClientDepart(client.index, this->minute, client.banana, client.schweppes);
 }
+
+/// Checking if a client has already left, we skip the event
 
 bool MyStore::checkForPastClients(const size_t &clientIndex)
 {

@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <stdexcept>
+#include <cmath>
 #include "interface.h"
 #include "consoleLogger.h"
 #include "myClient.h"
@@ -15,17 +16,16 @@ const int RESTOCK_AMOUNT = 100;
 class MyStore : public Store {
 
 	private:
-	int bananas;
-	int schweppes;
-	int workers;
-    int index;
-	int currentIndex;
-	int minute;
-	size_t workersGoingBanana;
-	size_t workersGoingSchweppes;
-	PriorityQueue<Event*> events;
-	PriorityQueue<int> nextWorkerBack;
-	std::vector<int> pastClients;
+	int bananas; ///< Amount of bananas in the store
+	int schweppes; ///< Amount of schweppes in the store
+	int workers; ///< Amount of workers in the store
+    int index; ///< How many clients we have
+	int minute; ///< Current minute
+	size_t workersGoingBanana; ///< How many workers are going for bananas
+	size_t workersGoingSchweppes; ///< How many workers are going for schweppes
+	PriorityQueue<Event*> events; ///< Events happening chronologically
+	PriorityQueue<int> nextWorkerBack; ///< Keeps the time when workers are coming back
+	std::vector<int> pastClients;  ///< Keeps track of the clients that have been served
 
 	ActionHandler *actionHandler = nullptr;
 	ConsoleLogger *consoleLogger;

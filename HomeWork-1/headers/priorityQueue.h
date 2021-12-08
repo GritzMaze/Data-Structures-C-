@@ -1,5 +1,4 @@
 #pragma once
-// #include "Node.h"
 #include <stdexcept>
 #include "interface.h"
 
@@ -16,7 +15,6 @@ private:
             : data(data), priority(priority), next(next) {}
     };
     Node *front;
-    Node *back;
 
     void clear();
 
@@ -34,7 +32,6 @@ template <class DType>
 PriorityQueue<DType>::PriorityQueue()
 {
     front = nullptr;
-    back = nullptr;
 }
 
 template <class DType>
@@ -51,7 +48,6 @@ void PriorityQueue<DType>::enqueue(const DType &data, const int &priority)
     if (this->isEmpty())
     {
         this->front = temp;
-        this->back = temp;
     }
     else if (front->priority > priority)
     {
@@ -66,10 +62,6 @@ void PriorityQueue<DType>::enqueue(const DType &data, const int &priority)
         }
         temp->next = it->next;
         it->next = temp;
-        if (temp->next == nullptr)
-        {
-            this->back = temp;
-        }
     }
 }
 

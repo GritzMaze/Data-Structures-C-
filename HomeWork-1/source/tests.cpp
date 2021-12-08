@@ -10,66 +10,82 @@ const int RESTOCK_AMOUNT = 100;
 
 typedef std::vector<Client> ClientList;
 
-struct StoreEvent {
-	enum Type {
-		WorkerSend, WorkerBack, ClientDepart
+struct StoreEvent
+{
+	enum Type
+	{
+		WorkerSend,
+		WorkerBack,
+		ClientDepart
 	};
 
 	Type type;
 	int minute;
 
-	struct Worker {
+	struct Worker
+	{
 		ResourceType resource;
 	} worker;
 
-	struct Client {
+	struct Client
+	{
 		int index;
 		int banana;
 		int schweppes;
 	} client;
 };
 
-struct TestStore : ActionHandler {
+struct TestStore : ActionHandler
+{
 	Store *impl = nullptr;
 	std::vector<StoreEvent> log;
 
 	TestStore()
-		: impl(createStore()) {
+		: impl(createStore())
+	{
 		impl->setActionHandler(this);
 	}
 
-	~TestStore() {
+	~TestStore()
+	{
 		delete impl;
 	}
 
 	TestStore(const TestStore &) = delete;
 	TestStore &operator=(const TestStore &) = delete;
 
-	void init(int workerCount, int startBanana, int startSchweppes) {
+	void init(int workerCount, int startBanana, int startSchweppes)
+	{
 		impl->init(workerCount, startBanana, startSchweppes);
 	}
 
-	void advanceTo(int minute) {
+	void advanceTo(int minute)
+	{
 		impl->advanceTo(minute);
 	}
 
-	int getBanana() const {
+	int getBanana() const
+	{
 		return impl->getBanana();
 	}
 
-	int getSchweppes() const {
+	int getSchweppes() const
+	{
 		return impl->getSchweppes();
 	}
 
-	void addClients(const ClientList &clients) {
+	void addClients(const ClientList &clients)
+	{
 		impl->addClients(clients.data(), clients.size());
 	}
 
-	void addClients(const Client &single) {
+	void addClients(const Client &single)
+	{
 		impl->addClients(&single, 1);
 	}
 
-	void onWorkerSend(int minute, ResourceType resource) override {
+	void onWorkerSend(int minute, ResourceType resource) override
+	{
 		StoreEvent ev;
 		ev.type = StoreEvent::WorkerSend;
 		ev.minute = minute;
@@ -77,7 +93,8 @@ struct TestStore : ActionHandler {
 		log.push_back(ev);
 	}
 
-	void onWorkerBack(int minute, ResourceType resource) override {
+	void onWorkerBack(int minute, ResourceType resource) override
+	{
 		StoreEvent ev;
 		ev.type = StoreEvent::WorkerBack;
 		ev.minute = minute;
@@ -85,7 +102,8 @@ struct TestStore : ActionHandler {
 		log.push_back(ev);
 	}
 
-	void onClientDepart(int index, int minute, int banana, int schweppes) override {
+	void onClientDepart(int index, int minute, int banana, int schweppes) override
+	{
 		StoreEvent ev;
 		ev.type = StoreEvent::ClientDepart;
 		ev.minute = minute;
@@ -98,11 +116,13 @@ struct TestStore : ActionHandler {
 
 #define LastEvent() (store.log.back())
 
-TEST_CASE("No workers, empty store, up to one client") {
+TEST_CASE("No workers, empty store, up to one client")
+{
 	TestStore store;
 	store.init(0, 0, 0);
 
-	SECTION("No events") {
+	SECTION("No events")
+	{
 		INFO("Without clients, no events should be generated");
 		REQUIRE(store.log.size() == 0);
 		store.advanceTo(0);
@@ -114,14 +134,16 @@ TEST_CASE("No workers, empty store, up to one client") {
 		REQUIRE(store.log.size() == 0);
 	}
 
-	SECTION("Advance before depart time") {
+	SECTION("Advance before depart time")
+	{
 		store.addClients(Client{0, 1, 1, 1});
 		store.advanceTo(0);
 		INFO("Must not generate event before time is advanced to its time");
 		REQUIRE(store.log.size() == 0);
 	}
 
-	SECTION("Depart time") {
+	SECTION("Depart time")
+	{
 		INFO("maxWaitTime == 1 means, client will wait 1 minute (arrive at 0, depart at 1)");
 		INFO("advanceTo(<time>), should generate all events that happen up to and including <time>");
 		store.addClients(Client{0, 1, 1, 1});
@@ -129,7 +151,8 @@ TEST_CASE("No workers, empty store, up to one client") {
 		REQUIRE(store.log.size() == 1);
 	}
 
-	SECTION("client without request") {
+	SECTION("client without request")
+	{
 		INFO("Client with wait time 0, must generate event at the time of arrival");
 		store.addClients(Client{0, 0, 0, 0});
 		store.advanceTo(0);
@@ -142,7 +165,8 @@ TEST_CASE("No workers, empty store, up to one client") {
 		REQUIRE(LastEvent().client.schweppes == 0);
 	}
 
-	SECTION("advance before client departs") {
+	SECTION("advance before client departs")
+	{
 		store.addClients(Client{0, 1, 1, 10});
 
 		store.advanceTo(3);
@@ -151,16 +175,17 @@ TEST_CASE("No workers, empty store, up to one client") {
 	}
 }
 
-TEST_CASE("No workers, full store") {
+TEST_CASE("No workers, full store")
+{
 	TestStore store;
 	store.init(0, 1000, 1000);
 	const ClientList three = {
 		Client{0, 0, 10, 10},
 		Client{0, 10, 0, 3},
-		Client{0, 10, 10, 5}
-	};
+		Client{0, 10, 10, 5}};
 
-	SECTION("Non waiting client") {
+	SECTION("Non waiting client")
+	{
 		store.addClients(Client{0, 10, 0, 0});
 		store.advanceTo(0);
 		INFO("Client must depart same at the time of arrival when store has enough resources");
@@ -168,7 +193,8 @@ TEST_CASE("No workers, full store") {
 		REQUIRE(store.log[0].type == StoreEvent::ClientDepart);
 	}
 
-	SECTION("Client with wait time") {
+	SECTION("Client with wait time")
+	{
 		store.addClients(Client{0, 10, 0, 10});
 		store.advanceTo(0);
 		INFO("Client must depart same at the time of arrival when store has enough resources");
@@ -176,7 +202,8 @@ TEST_CASE("No workers, full store") {
 		REQUIRE(store.log[0].type == StoreEvent::ClientDepart);
 	}
 
-	SECTION("Multiple clients") {
+	SECTION("Multiple clients")
+	{
 		store.addClients(three);
 		store.advanceTo(0);
 		INFO("Client must depart same at the time of arrival when store has enough resources");
@@ -186,7 +213,8 @@ TEST_CASE("No workers, full store") {
 		REQUIRE(store.log[2].type == StoreEvent::ClientDepart);
 	}
 
-	SECTION("Client indices") {
+	SECTION("Client indices")
+	{
 		store.addClients(three);
 		store.advanceTo(0);
 		INFO("Indices must be correct");
@@ -196,13 +224,15 @@ TEST_CASE("No workers, full store") {
 	}
 }
 
-TEST_CASE("Multiple stores") {
+TEST_CASE("Multiple stores")
+{
 	TestStore bananaStore;
 	bananaStore.init(0, 100, 0);
 	TestStore schweppesStore;
 	schweppesStore.init(0, 0, 100);
 
-	SECTION("Two stores") {
+	SECTION("Two stores")
+	{
 		INFO("Multiple stores must be ebable to exist at the same time");
 
 		REQUIRE(bananaStore.getBanana() == 100);
@@ -212,7 +242,8 @@ TEST_CASE("Multiple stores") {
 		REQUIRE(schweppesStore.getSchweppes() == 100);
 	}
 
-	SECTION("Clients to one of the stores") {
+	SECTION("Clients to one of the stores")
+	{
 		bananaStore.addClients(Client{0, 10, 0, 10});
 		bananaStore.advanceTo(0);
 		schweppesStore.advanceTo(0);
@@ -222,7 +253,8 @@ TEST_CASE("Multiple stores") {
 		REQUIRE(schweppesStore.log.size() == 0);
 	}
 
-	SECTION("Clients to both stores") {
+	SECTION("Clients to both stores")
+	{
 		bananaStore.addClients(Client{0, 5, 0, 0});
 		schweppesStore.addClients(Client{0, 0, 10, 0});
 
@@ -238,25 +270,26 @@ TEST_CASE("Multiple stores") {
 	}
 }
 
-TEST_CASE("Example") {
+TEST_CASE("Example")
+{
 	TestStore store;
 	store.init(5, 0, 0);
 
-	store.addClients({
-		Client{0, 10, 0, 10},
-		Client{45, 35, 0, 30},
-		Client{46, 30, 20, 100},
-		Client{200, 10, 10, 1}
-	});
+	store.addClients({Client{0, 10, 0, 10},
+					  Client{45, 35, 0, 30},
+					  Client{46, 30, 20, 100},
+					  Client{200, 10, 10, 1}});
 
-	SECTION("First client") {
+	SECTION("First client")
+	{
 		store.advanceTo(0);
 		INFO("First client will trigger 1 worker");
 		REQUIRE(store.log.size() == 1);
 		REQUIRE(LastEvent().type == StoreEvent::WorkerSend);
 	}
 
-	SECTION("First client") {
+	SECTION("First client")
+	{
 		store.advanceTo(10);
 		INFO("First client must depart without anything");
 		REQUIRE(store.log.size() == 2);
@@ -264,7 +297,8 @@ TEST_CASE("Example") {
 		REQUIRE(LastEvent().client.banana == 0);
 	}
 
-	SECTION("Last client") {
+	SECTION("Last client")
+	{
 		store.advanceTo(200);
 		INFO("Last client departs same time as arrival");
 		REQUIRE(store.log.size() == 8);
@@ -273,21 +307,29 @@ TEST_CASE("Example") {
 		REQUIRE(LastEvent().client.schweppes == 10);
 	}
 
-	SECTION("Remaining resources") {
+	SECTION("Remaining resources")
+	{
 		store.advanceTo(500);
 		int bananas = 0;
 		int schweppes = 0;
-		for (int c = 0; c < store.log.size(); c++) {
+		for (int c = 0; c < store.log.size(); c++)
+		{
 			const StoreEvent &ev = store.log[c];
-			if (ev.type == StoreEvent::WorkerBack) {
+			if (ev.type == StoreEvent::WorkerBack)
+			{
 				REQUIRE(store.log[c].worker.resource >= ResourceType::banana);
 				REQUIRE(store.log[c].worker.resource <= ResourceType::schweppes);
-				if (ev.worker.resource == ResourceType::banana) {
+				if (ev.worker.resource == ResourceType::banana)
+				{
 					bananas += RESTOCK_AMOUNT;
-				} else if (ev.worker.resource == ResourceType::schweppes) {
+				}
+				else if (ev.worker.resource == ResourceType::schweppes)
+				{
 					schweppes += RESTOCK_AMOUNT;
 				}
-			} else if (ev.type == StoreEvent::ClientDepart) {
+			}
+			else if (ev.type == StoreEvent::ClientDepart)
+			{
 				bananas -= ev.client.banana;
 				schweppes -= ev.client.schweppes;
 			}
@@ -299,17 +341,16 @@ TEST_CASE("Example") {
 	}
 }
 
-TEST_CASE("Workers can be sent out only when needed") {
+TEST_CASE("Workers can be sent out only when needed")
+{
 	TestStore store;
 	store.init(1, 100, 0);
 
-	store.addClients({
-		Client{0, 100, 0, 1}, // this client will get everything
-		Client{10, 1, 0, 1}
-	});
+	store.addClients({Client{0, 100, 0, 1}, // this client will get everything
+					  Client{10, 1, 0, 1}});
 
-
-	SECTION("Before second client") {
+	SECTION("Before second client")
+	{
 		store.advanceTo(9);
 
 		INFO("Worker must not be sent before client arrives");
@@ -318,7 +359,8 @@ TEST_CASE("Workers can be sent out only when needed") {
 		REQUIRE(store.getBanana() == 0);
 	}
 
-	SECTION("After second client") {
+	SECTION("After second client")
+	{
 		store.advanceTo(10);
 
 		INFO("Worker must be sent the same minute second clients arrives");
@@ -328,42 +370,44 @@ TEST_CASE("Workers can be sent out only when needed") {
 	}
 }
 
-TEST_CASE("Workers must not be sent if resource will be available before client departs") {
+TEST_CASE("Workers must not be sent if resource will be available before client departs")
+{
 	TestStore store;
 	store.init(2, 0, 0);
 
-	store.addClients({
-		Client{0, 10, 0, 200},
-		Client{10, 10, 0, 200}
-	});
+	store.addClients({Client{0, 10, 0, 200},
+					  Client{10, 10, 0, 200}});
 
-	SECTION("First client must trigger a worker") {
+	SECTION("First client must trigger a worker")
+	{
 		store.advanceTo(5);
 		REQUIRE(store.log.size() == 1);
 	}
 
-	SECTION("Second client must not trigger a worker") {
+	SECTION("Second client must not trigger a worker")
+	{
 		store.advanceTo(15);
 		REQUIRE(store.log.size() == 1);
 	}
 }
 
-TEST_CASE("Clients depart and take what they can") {
+TEST_CASE("Clients depart and take what they can")
+{
 	TestStore store;
 	store.init(5, 10, 0);
 
-	store.addClients({
-		Client{0, 0, 10, 0}, // Trigger worker sent for schweppes
-		Client{1, 20, 0, 5}
-	});
+	store.addClients({Client{0, 0, 10, 0}, // Trigger worker sent for schweppes
+					  Client{1, 20, 0, 5}});
 
-	SECTION("Sent out workers") {
+	SECTION("Sent out workers")
+	{
 		store.advanceTo(3);
 		INFO("Store must send 2 workers, and 1 client has departed");
 		REQUIRE(store.log.size() == 3);
 	}
 
-	SECTION("Client departs with only part of requirement") {
+	SECTION("Client departs with only part of requirement")
+	{
 		store.advanceTo(1 + 5);
 
 		INFO("Client must take whatever is available");
@@ -373,16 +417,16 @@ TEST_CASE("Clients depart and take what they can") {
 	}
 }
 
-TEST_CASE("Clients arrive/depart in mixed order") {
+TEST_CASE("Clients arrive/depart in mixed order")
+{
 	TestStore store;
 	store.init(2, 10, 0);
 
-	store.addClients({
-		Client{0, 10, 10, 20},
-		Client{10, 10, 0, 0}
-	});
+	store.addClients({Client{0, 10, 10, 20},
+					  Client{10, 10, 0, 0}});
 
-	SECTION("One worker must be sent") {
+	SECTION("One worker must be sent")
+	{
 		store.advanceTo(0);
 
 		INFO("First client must trigger a worker to restock schweppes");
@@ -391,7 +435,8 @@ TEST_CASE("Clients arrive/depart in mixed order") {
 		REQUIRE(LastEvent().worker.resource == ResourceType::schweppes);
 	}
 
-	SECTION("Second client") {
+	SECTION("Second client")
+	{
 		store.advanceTo(10);
 
 		INFO("Second client comes at min 10, but waits 0, departs at min 10");
@@ -401,7 +446,8 @@ TEST_CASE("Clients arrive/depart in mixed order") {
 		REQUIRE(LastEvent().client.index == 1);
 	}
 
-	SECTION("First client") {
+	SECTION("First client")
+	{
 		store.advanceTo(20);
 
 		INFO("First client departs nothing after second client");
@@ -414,13 +460,15 @@ TEST_CASE("Clients arrive/depart in mixed order") {
 
 // New Tests
 
-TEST_CASE("Client sents workers, he comebacks, then client depart at max time") {
+TEST_CASE("Client sents workers, he comebacks, then client depart at max time")
+{
 	TestStore store;
 	store.init(1, 0, 0);
 
 	store.addClients(Client{0, 110, 0, 130});
 
-	SECTION("The worker must be sent") {
+	SECTION("The worker must be sent")
+	{
 		store.advanceTo(0);
 
 		INFO("The worker is sent");
@@ -429,7 +477,8 @@ TEST_CASE("Client sents workers, he comebacks, then client depart at max time") 
 		REQUIRE(LastEvent().worker.resource == ResourceType::banana);
 	}
 
-	SECTION("The worker comeback") {
+	SECTION("The worker comeback")
+	{
 		store.advanceTo(60);
 
 		INFO("The worker comeback");
@@ -438,7 +487,8 @@ TEST_CASE("Client sents workers, he comebacks, then client depart at max time") 
 		REQUIRE(LastEvent().worker.resource == ResourceType::banana);
 	}
 
-	SECTION("The client depart") {
+	SECTION("The client depart")
+	{
 		store.advanceTo(130);
 
 		INFO("The client depart");
@@ -448,17 +498,17 @@ TEST_CASE("Client sents workers, he comebacks, then client depart at max time") 
 	}
 }
 
-TEST_CASE("Client sents more than one worker at once") {
+TEST_CASE("Client sents more than one worker at once")
+{
 
 	TestStore store;
 	store.init(5, 0, 0);
 
-	store.addClients({
-		Client{0, 300, 0, 60},
-		Client{5, 1000, 0, 55}
-		});
+	store.addClients({Client{0, 300, 0, 60},
+					  Client{5, 1000, 0, 55}});
 
-	SECTION("3 workers must be sent") {
+	SECTION("3 workers must be sent")
+	{
 		store.advanceTo(0);
 
 		INFO("3 Workers are sent");
@@ -467,7 +517,8 @@ TEST_CASE("Client sents more than one worker at once") {
 		REQUIRE(LastEvent().worker.resource == ResourceType::banana);
 	}
 
-	SECTION("2 more workers must be sent") {
+	SECTION("2 more workers must be sent")
+	{
 		store.advanceTo(5);
 
 		INFO("2 Workers are sent");
@@ -475,7 +526,8 @@ TEST_CASE("Client sents more than one worker at once") {
 		REQUIRE(LastEvent().type == StoreEvent::WorkerSend);
 	}
 
-	SECTION("3 Workers come back") {
+	SECTION("3 Workers come back")
+	{
 		store.advanceTo(60);
 
 		INFO("Workers come back, first clients depart, first client get everything");
@@ -486,19 +538,20 @@ TEST_CASE("Client sents more than one worker at once") {
 	}
 }
 
-
 // Priorities Tests
 
-TEST_CASE("Priorities") {
+TEST_CASE("Priorities")
+{
 	TestStore store;
 	store.init(1, 10, 20);
 
 	store.addClients({
 		Client{0, 30, 20, 60}, // Trigger worker sent for bananas
 		Client{60, 10, 20, 1},
-		});
+	});
 
-	SECTION("Worker depart") {
+	SECTION("Worker depart / Equal need")
+	{
 		store.advanceTo(0);
 
 		INFO("Worker is sent");
@@ -507,7 +560,8 @@ TEST_CASE("Priorities") {
 		REQUIRE(LastEvent().worker.resource == ResourceType::banana);
 	}
 
-	SECTION("Client depart") {
+	SECTION("Client depart")
+	{
 		store.advanceTo(60);
 
 		INFO("New client comes in, takes what he wants, worker comes back, first client departs");
@@ -521,6 +575,4 @@ TEST_CASE("Priorities") {
 		REQUIRE(LastEvent().client.banana == 30);
 		REQUIRE(LastEvent().client.index == 0);
 	}
-
-
 }
