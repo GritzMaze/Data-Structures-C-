@@ -538,8 +538,6 @@ TEST_CASE("Client sents more than one worker at once")
 	}
 }
 
-// Priorities Tests
-
 TEST_CASE("Priorities")
 {
 	TestStore store;
@@ -574,5 +572,27 @@ TEST_CASE("Priorities")
 		REQUIRE(LastEvent().type == StoreEvent::ClientDepart);
 		REQUIRE(LastEvent().client.banana == 30);
 		REQUIRE(LastEvent().client.index == 0);
+	}
+}
+
+TEST_CASE("Send workers for both resource triggered by one client")
+{
+	TestStore store;
+	store.init(2, 0, 0);
+
+	store.addClients({
+		Client{0, 30, 30, 60}
+	});
+
+	SECTION("Worker sent for banana")
+	{
+		store.advanceTo(0);
+
+		INFO("Workers are sent");
+		REQUIRE(store.log.size() == 2);
+		REQUIRE(store.log[0].type == StoreEvent::WorkerSend);
+		REQUIRE(store.log[0].worker.resource == ResourceType::banana);
+		REQUIRE(LastEvent().type == StoreEvent::WorkerSend);
+		REQUIRE(LastEvent().worker.resource == ResourceType::schweppes);
 	}
 }

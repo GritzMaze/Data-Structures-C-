@@ -1,10 +1,8 @@
 #pragma once
 
+#include "interface.h"
 
-struct MyClient {
-    int arriveMinute;
-    int banana;
-    int schweppes;
+struct MyClient : public Client {
     int maxWaitTimeMin;
     int index;
 };

@@ -24,14 +24,14 @@ while(numClients--) {
     store.addClients(clients.data(), clients.size());
     store.advance();
     
-    // Client client1{0, 300, 0, 10};
+    // Client client1{0, 10, 10, 10};
     // Client client2{5, 300, 0, 10};
     
     // MyStore store;
-    // store.init(5, 0, 0);
+    // store.init(2, 0, 0);
     // store.addClients(&client1, 1);
     // store.addClients(&client2, 1);
 
-    // store.advanceTo(15);
+    // store.advanceTo(0);
     return 0;
 }

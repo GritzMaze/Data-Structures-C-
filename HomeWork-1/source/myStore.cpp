@@ -159,7 +159,6 @@ bool MyStore::need(int &bananas, int &schweppes)
 				float workersNeeded = (bananas - (this->schweppes - schweppes)) / RESTOCK_AMOUNT;
 				int workersNeededInt = (std::truncf(workersNeeded) ? (int)workersNeeded : (int)workersNeeded + 1);
 				sendWorker(ResourceType::banana, workersNeededInt);
-				return false;
 			}
 		}
 		
@@ -169,7 +168,6 @@ bool MyStore::need(int &bananas, int &schweppes)
 			float workersNeeded = (schweppes - (this->schweppes - schweppes)) / RESTOCK_AMOUNT;
 			int workersNeededInt = (std::truncf(workersNeeded) ? (int)workersNeeded : (int)workersNeeded + 1);
 			sendWorker(ResourceType::schweppes, workersNeededInt);
-			return false;
 		}
 	}
 	return false;
@@ -208,11 +206,11 @@ void MyStore::addClients(const Client *clients, int count = 1)
 	while (counter != count)
 	{
 		MyClient temp;
-		temp.arriveMinute = (*(clients + counter)).arriveMinute;
-		temp.banana = (*(clients + counter)).banana;
-		temp.schweppes = (*(clients + counter)).schweppes;
-		temp.maxWaitTimeMin = temp.arriveMinute + (*(clients + counter)).maxWaitTime;
-		temp.index = index++;
+		temp.arriveMinute = clients[counter].arriveMinute;
+		temp.banana = clients[counter].banana;
+		temp.schweppes = clients[counter].schweppes;
+		temp.maxWaitTimeMin = temp.arriveMinute + clients[counter].maxWaitTime;
+		temp.index = this->index++;
 
 		if(temp.arriveMinute < 0 || temp.banana < 0 || temp.schweppes < 0 || temp.maxWaitTimeMin < 0)
 		{
