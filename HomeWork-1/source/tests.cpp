@@ -447,3 +447,80 @@ TEST_CASE("Client sents workers, he comebacks, then client depart at max time") 
 		REQUIRE(LastEvent().client.banana == 100);
 	}
 }
+
+TEST_CASE("Client sents more than one worker at once") {
+
+	TestStore store;
+	store.init(5, 0, 0);
+
+	store.addClients({
+		Client{0, 300, 0, 60},
+		Client{5, 1000, 0, 55}
+		});
+
+	SECTION("3 workers must be sent") {
+		store.advanceTo(0);
+
+		INFO("3 Workers are sent");
+		REQUIRE(store.log.size() == 3);
+		REQUIRE(LastEvent().type == StoreEvent::WorkerSend);
+		REQUIRE(LastEvent().worker.resource == ResourceType::banana);
+	}
+
+	SECTION("2 more workers must be sent") {
+		store.advanceTo(5);
+
+		INFO("2 Workers are sent");
+		REQUIRE(store.log.size() == 5);
+		REQUIRE(LastEvent().type == StoreEvent::WorkerSend);
+	}
+
+	SECTION("3 Workers come back") {
+		store.advanceTo(60);
+
+		INFO("Workers come back, first clients depart, first client get everything");
+		REQUIRE(store.log.size() == 10);
+		REQUIRE(LastEvent().type == StoreEvent::ClientDepart);
+		REQUIRE(LastEvent().client.banana == 0);
+		REQUIRE(LastEvent().client.index == 1);
+	}
+}
+
+
+// Priorities Tests
+
+TEST_CASE("Priorities") {
+	TestStore store;
+	store.init(1, 10, 20);
+
+	store.addClients({
+		Client{0, 30, 20, 60}, // Trigger worker sent for bananas
+		Client{60, 10, 20, 1},
+		});
+
+	SECTION("Worker depart") {
+		store.advanceTo(0);
+
+		INFO("Worker is sent");
+		REQUIRE(store.log.size() == 1);
+		REQUIRE(LastEvent().type == StoreEvent::WorkerSend);
+		REQUIRE(LastEvent().worker.resource == ResourceType::banana);
+	}
+
+	SECTION("Client depart") {
+		store.advanceTo(60);
+
+		INFO("New client comes in, takes what he wants, worker comes back, first client departs");
+		REQUIRE(store.log.size() == 4);
+		REQUIRE(store.log[1].type == StoreEvent::ClientDepart);
+		REQUIRE(store.log[1].client.index == 1);
+		REQUIRE(store.log[1].client.banana == 10);
+		REQUIRE(store.log[1].client.schweppes == 20);
+		REQUIRE(store.log[2].type == StoreEvent::WorkerBack);
+		REQUIRE(LastEvent().type == StoreEvent::ClientDepart);
+		REQUIRE(LastEvent().client.banana == 30);
+		REQUIRE(LastEvent().client.index == 0);
+	}
+
+
+}
