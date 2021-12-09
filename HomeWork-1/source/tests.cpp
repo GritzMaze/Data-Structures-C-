@@ -596,3 +596,47 @@ TEST_CASE("Send workers for both resource triggered by one client")
 		REQUIRE(LastEvent().worker.resource == ResourceType::schweppes);
 	}
 }
+
+
+TEST_CASE("2 Clients depart") {
+
+	TestStore store;
+	store.init(1, 10, 10);
+
+	store.addClients({
+		Client{0, 30, 30, 3},
+		Client{2, 20, 20, 2}
+	});
+
+	SECTION("Worker must be sent")
+	{
+		store.advanceTo(0);
+
+		INFO("Worker is sent");
+		REQUIRE(store.log.size() == 1);
+		REQUIRE(LastEvent().type == StoreEvent::WorkerSend);
+	}
+
+
+	SECTION("First Client depart") {
+		store.advanceTo(3);
+
+		INFO("First client depart, take what he can");
+		REQUIRE(store.log.size() == 2);
+		REQUIRE(LastEvent().type == StoreEvent::ClientDepart);
+		REQUIRE(LastEvent().client.banana == 10);
+		REQUIRE(LastEvent().client.schweppes == 10);
+		REQUIRE(LastEvent().client.index == 0);
+	}
+
+	SECTION("Second Client depart") {
+		store.advanceTo(4);
+
+		INFO("Second client depart emptyhanded");
+		REQUIRE(store.log.size() == 3);
+		REQUIRE(LastEvent().type == StoreEvent::ClientDepart);
+		REQUIRE(LastEvent().client.banana == 0);
+		REQUIRE(LastEvent().client.schweppes == 0);
+		REQUIRE(LastEvent().client.index == 1);
+	}
+}

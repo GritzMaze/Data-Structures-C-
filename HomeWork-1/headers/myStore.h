@@ -43,11 +43,16 @@ class MyStore : public Store {
 	void addClients(const Client *clients, int count) override;
 	void advanceTo(int minute) override;
 	void advance();
+
+	// Service related
+
 	void service(MyClient&);
 	bool need(int&, int&);
 	void needForce(int&, int&);
 	void updateStock(const ResourceType);
 	
+	// Action related
+
 	void sendWorker(const ResourceType, size_t);
 	void workerBack(const ResourceType);
 	void clientDepart(const MyClient&);
