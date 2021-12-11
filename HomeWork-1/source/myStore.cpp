@@ -166,7 +166,7 @@ bool MyStore::need(int bananas, int schweppes)
 					bananas = 0;
 			}
 			else
-			{	/// else we check do we need schweppes
+			{ /// else we check do we need schweppes
 				if (!(this->schweppes + schweppesComing >= schweppes))
 				{
 					sendWorker(ResourceType::schweppes);

@@ -580,9 +580,7 @@ TEST_CASE("Send workers for both resource triggered by one client")
 	TestStore store;
 	store.init(2, 0, 0);
 
-	store.addClients({
-		Client{0, 30, 30, 60}
-	});
+	store.addClients({Client{0, 30, 30, 60}});
 
 	SECTION("Worker sent for banana")
 	{
@@ -597,16 +595,14 @@ TEST_CASE("Send workers for both resource triggered by one client")
 	}
 }
 
-
-TEST_CASE("2 Clients depart") {
+TEST_CASE("2 Clients depart")
+{
 
 	TestStore store;
 	store.init(1, 10, 10);
 
-	store.addClients({
-		Client{0, 30, 30, 3},
-		Client{2, 20, 20, 2}
-	});
+	store.addClients({Client{0, 30, 30, 3},
+					  Client{2, 20, 20, 2}});
 
 	SECTION("Worker must be sent")
 	{
@@ -617,8 +613,8 @@ TEST_CASE("2 Clients depart") {
 		REQUIRE(LastEvent().type == StoreEvent::WorkerSend);
 	}
 
-
-	SECTION("First Client depart") {
+	SECTION("First Client depart")
+	{
 		store.advanceTo(3);
 
 		INFO("First client depart, take what he can");
@@ -629,7 +625,8 @@ TEST_CASE("2 Clients depart") {
 		REQUIRE(LastEvent().client.index == 0);
 	}
 
-	SECTION("Second Client depart") {
+	SECTION("Second Client depart")
+	{
 		store.advanceTo(4);
 
 		INFO("Second client depart emptyhanded");
@@ -643,16 +640,16 @@ TEST_CASE("2 Clients depart") {
 
 // Gotten from discord
 
-TEST_CASE("Order of sending workers") {
-	
+TEST_CASE("Order of sending workers")
+{
+
 	TestStore store;
 	store.init(4, 0, 0);
 
-	store.addClients({
-	Client{0, 350, 200, 60}
-	});
+	store.addClients({Client{0, 350, 200, 60}});
 
-	SECTION("Four workers should be sent") {
+	SECTION("Four workers should be sent")
+	{
 		store.advanceTo(0);
 
 		INFO("Two workers for banana, one for schweppes, then one for banana");
@@ -667,7 +664,8 @@ TEST_CASE("Order of sending workers") {
 		REQUIRE(store.log[3].worker.resource == ResourceType::banana);
 	}
 
-	SECTION("Arrival and departure") {
+	SECTION("Arrival and departure")
+	{
 		store.advanceTo(60);
 
 		INFO("Workers arrive in the same order, then client leave");
@@ -685,5 +683,4 @@ TEST_CASE("Order of sending workers") {
 		REQUIRE(LastEvent().client.schweppes == 100);
 		REQUIRE(LastEvent().client.index == 0);
 	}
-
 }
