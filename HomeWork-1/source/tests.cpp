@@ -640,3 +640,50 @@ TEST_CASE("2 Clients depart") {
 		REQUIRE(LastEvent().client.index == 1);
 	}
 }
+
+// Gotten from discord
+
+TEST_CASE("Order of sending workers") {
+	
+	TestStore store;
+	store.init(4, 0, 0);
+
+	store.addClients({
+	Client{0, 350, 200, 60}
+	});
+
+	SECTION("Four workers should be sent") {
+		store.advanceTo(0);
+
+		INFO("Two workers for banana, one for schweppes, then one for banana");
+		REQUIRE(store.log.size() == 4);
+		REQUIRE(store.log[0].type == StoreEvent::WorkerSend);
+		REQUIRE(store.log[0].worker.resource == ResourceType::banana);
+		REQUIRE(store.log[1].type == StoreEvent::WorkerSend);
+		REQUIRE(store.log[1].worker.resource == ResourceType::banana);
+		REQUIRE(store.log[2].type == StoreEvent::WorkerSend);
+		REQUIRE(store.log[2].worker.resource == ResourceType::schweppes);
+		REQUIRE(store.log[3].type == StoreEvent::WorkerSend);
+		REQUIRE(store.log[3].worker.resource == ResourceType::banana);
+	}
+
+	SECTION("Arrival and departure") {
+		store.advanceTo(60);
+
+		INFO("Workers arrive in the same order, then client leave");
+		REQUIRE(store.log.size() == 9);
+		REQUIRE(store.log[4].type == StoreEvent::WorkerBack);
+		REQUIRE(store.log[4].worker.resource == ResourceType::banana);
+		REQUIRE(store.log[5].type == StoreEvent::WorkerBack);
+		REQUIRE(store.log[5].worker.resource == ResourceType::banana);
+		REQUIRE(store.log[6].type == StoreEvent::WorkerBack);
+		REQUIRE(store.log[6].worker.resource == ResourceType::schweppes);
+		REQUIRE(store.log[7].type == StoreEvent::WorkerBack);
+		REQUIRE(store.log[7].worker.resource == ResourceType::banana);
+		REQUIRE(LastEvent().type == StoreEvent::ClientDepart);
+		REQUIRE(LastEvent().client.banana == 300);
+		REQUIRE(LastEvent().client.schweppes == 100);
+		REQUIRE(LastEvent().client.index == 0);
+	}
+
+}

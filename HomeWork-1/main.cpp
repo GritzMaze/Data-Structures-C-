@@ -6,32 +6,30 @@
 
 int main(int, char**) {
 
-int workers, numClients;
-int min, bananas, schweppes, maxTime;
+// int workers, numClients;
+// int min, bananas, schweppes, maxTime;
 
-std::vector<Client> clients;
+// std::vector<Client> clients;
 
-std::cin >> workers >> numClients;
+// std::cin >> workers >> numClients;
 
-while(numClients--) {
-    std::cin >> min >> bananas >> schweppes >> maxTime;
-    clients.push_back(Client{min, bananas, schweppes, maxTime});
-}
+// while(numClients--) {
+//     std::cin >> min >> bananas >> schweppes >> maxTime;
+//     clients.push_back(Client{min, bananas, schweppes, maxTime});
+// }
 
 
-    MyStore store;
-    store.init(workers, 0, 0);
-    store.addClients(clients.data(), clients.size());
-    store.advance();
+//     MyStore store;
+//     store.init(workers, 0, 0);
+//     store.addClients(clients.data(), clients.size());
+//     store.advance();
     
-    // Client client1{0, 10, 10, 10};
-    // Client client2{5, 300, 0, 10};
-    
-    // MyStore store;
-    // store.init(2, 0, 0);
-    // store.addClients(&client1, 1);
-    // store.addClients(&client2, 1);
+     Client client1{0, 350, 200, 60};
 
-    // store.advanceTo(0);
+     MyStore store;
+     store.init(4, 0,0);
+        store.addClients(&client1, 1);
+        store.advance();
+
     return 0;
 }

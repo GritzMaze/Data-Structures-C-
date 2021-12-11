@@ -47,13 +47,13 @@ class MyStore : public Store {
 	// Service related
 
 	void service(MyClient&);
-	bool need(int&, int&);
+	bool need(int, int);
 	void needForce(int&, int&);
 	void updateStock(const ResourceType);
 	
 	// Action related
 
-	void sendWorker(const ResourceType, size_t);
+	void sendWorker(const ResourceType);
 	void workerBack(const ResourceType);
 	void clientDepart(const MyClient&);
 

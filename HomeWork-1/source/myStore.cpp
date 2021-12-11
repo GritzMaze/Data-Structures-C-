@@ -77,10 +77,10 @@ void MyStore::advance()
 void MyStore::advanceTo(int minute)
 {
 	/// if we move back in time
-	if(minute < this->minute)
+	if (minute < this->minute)
 		throw std::out_of_range("Invalid input");
 
-		/// while there are events left
+	/// while there are events left
 	while (!events.isEmpty() && events.first()->minute <= minute)
 	{
 		Event *temp = events.dequeue();
@@ -136,10 +136,13 @@ void MyStore::service(MyClient &client)
 
 /// Checks if clients need anything, then determine what worker should be sent
 
-bool MyStore::need(int &bananas, int &schweppes)
+bool MyStore::need(int bananas, int schweppes)
 {
 	int bananasComing = this->workersGoingBanana * RESTOCK_AMOUNT;
 	int schweppesComing = this->workersGoingSchweppes * RESTOCK_AMOUNT;
+
+	/// If the event actually need something
+	bool flag = (this->bananas + bananasComing > bananas) && (this->schweppes + schweppesComing > schweppes);
 
 	/// IF the store has what the client wants
 	if (bananas <= this->bananas && schweppes <= this->schweppes)
@@ -147,28 +150,48 @@ bool MyStore::need(int &bananas, int &schweppes)
 		this->needForce(bananas, schweppes);
 		return true;
 	}
-	else
+
+	while (this->workers && (bananas > 0 || schweppes > 0) && !flag)
 	{
 		/// Do we need bananas
 		if (!(this->bananas + bananasComing >= bananas))
 		{
 			/// Do we need bananas more than schweppes
-			if (this->bananas + bananas >= this->schweppes + schweppes)
+			if (this->bananas + bananas >= this->schweppes + schweppes && bananas)
 			{
-				/// Determines how many workers we need
-				float workersNeeded = (bananas - (this->schweppes - schweppes)) / RESTOCK_AMOUNT;
-				int workersNeededInt = (std::truncf(workersNeeded) ? (int)workersNeeded : (int)workersNeeded + 1);
-				sendWorker(ResourceType::banana, workersNeededInt);
+				sendWorker(ResourceType::banana);
+				if (bananas > 100)
+					bananas -= 100;
+				else
+					bananas = 0;
+			}
+			else
+			{	/// else we check do we need schweppes
+				if (!(this->schweppes + schweppesComing >= schweppes))
+				{
+					sendWorker(ResourceType::schweppes);
+					if (schweppes > 100)
+						schweppes -= 100;
+					else
+						schweppes = 0;
+				}
 			}
 		}
-		
-		/// Do we need schweppes
-		if (!(this->schweppes + schweppesComing >= schweppes))
+		else
 		{
-			float workersNeeded = (schweppes - (this->schweppes - schweppes)) / RESTOCK_AMOUNT;
-			int workersNeededInt = (std::truncf(workersNeeded) ? (int)workersNeeded : (int)workersNeeded + 1);
-			sendWorker(ResourceType::schweppes, workersNeededInt);
+			/// Do we need schweppes
+			if (!(this->schweppes + schweppesComing >= schweppes))
+			{
+				sendWorker(ResourceType::schweppes);
+				if (schweppes > 100)
+					schweppes -= 100;
+				else
+					schweppes = 0;
+			}
 		}
+
+		/// If we still need something
+		flag = (this->bananas + bananasComing >= bananas) && (this->schweppes + schweppesComing >= schweppes);
 	}
 	return false;
 }
@@ -212,7 +235,7 @@ void MyStore::addClients(const Client *clients, int count = 1)
 		temp.maxWaitTimeMin = temp.arriveMinute + clients[counter].maxWaitTime;
 		temp.index = this->index++;
 
-		if(temp.arriveMinute < 0 || temp.banana < 0 || temp.schweppes < 0 || temp.maxWaitTimeMin < 0)
+		if (temp.arriveMinute < 0 || temp.banana < 0 || temp.schweppes < 0 || temp.maxWaitTimeMin < 0)
 		{
 			throw std::out_of_range("Negative value");
 		}
@@ -236,7 +259,6 @@ void MyStore::addClients(const Client *clients, int count = 1)
 	}
 }
 
-
 /// Updating the resources in the store
 
 void MyStore::updateStock(const ResourceType type)
@@ -253,11 +275,11 @@ void MyStore::updateStock(const ResourceType type)
 
 /// Sending a worker for resource
 
-void MyStore::sendWorker(const ResourceType type, size_t workersNeeded)
+void MyStore::sendWorker(const ResourceType type)
 {
 
-	/// While available workers and needed workers
-	while (this->workers > 0 && workersNeeded > 0)
+	/// if there is available worker
+	if (this->workers)
 	{
 		/// Creating event for when a worker comes back
 		Event *ev = new Event();
@@ -266,7 +288,6 @@ void MyStore::sendWorker(const ResourceType type, size_t workersNeeded)
 		ev->worker.resource = type;
 		this->events.enqueue(ev, ev->minute + 11);
 		this->workers--;
-		workersNeeded--;
 		if (type == ResourceType::banana)
 			workersGoingBanana++;
 		else
