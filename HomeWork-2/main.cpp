@@ -1,11 +1,28 @@
 #include <iostream>
-#include "Tree.h"
 #include <string>
+#include "headers/Tree.h"
+
+using std::string;
 
 int main(int, char**) {
     std::cout << "Hello, world!\n";
 
-    Tree<std::string> tree;
+    Tree<string> tree("Uspeshnia");
+    tree.insert("Gosho", "Uspeshnia");
+    tree.insert("Misho", "Uspeshnia");
+    tree.insert("Slavi", "Uspeshnia");
+    tree.insert("Pesho", "Gosho");
+    tree.insert("Dancho", "Gosho");
+    tree.insert("Alex", "Pesho");
+    tree.insert("Boris", "Dancho");
+    tree.insert("Kamen", "Dancho");
+    tree.insert("Slav1", "Slavi");
+    tree.insert("Slav2", "Slavi");
+    tree.insert("Mecho", "Slav1");
+    tree.insert("Q12AD1", "Mecho");
+
+    tree.print();
+
 
     return 0;
 }

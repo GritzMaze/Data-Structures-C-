@@ -1,4 +1,56 @@
-#include "tree.h"
+#pragma once
+#include <iostream>
+#include <string>
+#include <queue>
+
+using std::string;
+
+template <class DataType>
+struct Node
+{
+    DataType data;
+    Node *child;
+    Node *siblings;
+    Node(const DataType &data, Node *child = nullptr, Node *siblings = nullptr)
+        : data(data), child(child), siblings(siblings) {}
+};
+
+template <class DataType>
+class Tree
+{
+private:
+    Node<DataType> *root;
+    int size;
+
+    Node<DataType> *copy(Node<DataType> *);
+    void clear(Node<DataType> *);
+
+    bool find(const DataType &, Node<DataType> *) const;
+    bool remove(const DataType &, Node<DataType> *&);
+
+    int height(const Node<DataType> *) const;
+    bool insert(const DataType &, const DataType &, Node<DataType> *&);
+    void printByLevels(const Node<DataType> *) const;
+
+public:
+    Tree() : root(nullptr), size(0) {}
+    Tree(const Tree &);
+    Tree(Tree &&);
+    Tree(const DataType &);
+    ~Tree();
+    Tree &operator=(const Tree &);
+    Tree &operator=(Tree &&);
+
+    bool find(const DataType &) const;
+    bool remove(const DataType &);
+
+    int getHeight() const;
+    int getSize() const;
+    bool isEmpty() const;
+
+    bool insert(const DataType &, const DataType &);
+    void print() const;
+};
 
 template <class DataType>
 Tree<DataType>::Tree(const Tree &other)
@@ -8,12 +60,19 @@ Tree<DataType>::Tree(const Tree &other)
 }
 
 template <class DataType>
-Tree<DataType>::Tree(Tree &&other) noexcept
+Tree<DataType>::Tree(Tree &&other)
 {
     root = other.root;
     size = other.size;
     other.root = nullptr;
     other.size = 0;
+}
+
+template <class DataType>
+Tree<DataType>::Tree(const DataType &data)
+{
+    root = new Node<DataType>(data);
+    size = 1;
 }
 
 template <class DataType>
@@ -35,7 +94,7 @@ Tree<DataType> &Tree<DataType>::operator=(const Tree &other)
 }
 
 template <class DataType>
-Tree<DataType> &Tree<DataType>::operator=(Tree &&other) noexcept
+Tree<DataType> &Tree<DataType>::operator=(Tree &&other)
 {
     if (this != &other)
     {
@@ -85,7 +144,7 @@ Node<DataType> *Tree<DataType>::copy(Node<DataType> *other)
     {
         return nullptr;
     }
-    Node *newNode = new Node(other->data, copy(other->child), copy(other->siblings));
+    Node<DataType> *newNode = new Node<DataType>(other->data, copy(other->child), copy(other->siblings));
     return newNode;
 }
 
@@ -160,13 +219,13 @@ int Tree<DataType>::height(const Node<DataType> *node) const
 }
 
 template <class DataType>
-void Tree<DataType>::insert(const DataType &data, const string &name)
+bool Tree<DataType>::insert(const DataType &data, const DataType &name)
 {
     return insert(data, name, root);
 }
 
 template <class DataType>
-bool Tree<DataType>::insert(const DataType &data, const string &name, Node<DataType> *&root)
+bool Tree<DataType>::insert(const DataType &data, const DataType &name, Node<DataType> *&root)
 {
     if (root == nullptr)
     {
@@ -199,31 +258,26 @@ bool Tree<DataType>::insert(const DataType &data, const string &name, Node<DataT
 }
 
 template <class DataType>
-void Tree<DataType>::printByLevels(const Node<DataType> *root) const
+void Tree<DataType>::printByLevels(const Node<DataType>* root) const
 {
-    if (!root)
-        return;
-    std::queue<const Node<DataType> *> front;
-    front.push(root);
-    front.push(nullptr);
-    for (;;)
+    if (root == nullptr)
     {
-        const node *current = front.front();
-        front.pop();
-        if (!current)
+        return;
+    }
+    else
+    {
+        while (root)
         {
-            std::cout << '\n';
-            if (front.empty())
-                return;
-            front.push(nullptr);
-        }
-        else
-        {
-            std::cout << current->data << ' ';
-            for (const Node<DataType> *it = current->child; it; it = it->siblings)
-            {
-                front.push(it);
-            }
+            std::cout << " " << root->data;
+            if (root->child)
+                printByLevels(root->child); // First, if child exists, traverse child. No return statement following here.
+            root = root->siblings;  // Next, traverse sibling
         }
     }
+}
+
+template <class DataType>
+void Tree<DataType>::print() const
+{
+    printByLevels(root);
 }

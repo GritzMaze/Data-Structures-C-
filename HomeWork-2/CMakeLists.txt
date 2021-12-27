@@ -7,12 +7,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(CTest)
 enable_testing()
 
-add_executable(tests tests.cpp
-                interface.h
-                catch.hpp            
-    )
+# add_executable(tests tests.cpp
+#                 interface.h
+#                 catch.hpp            
+#     )
 
-add_executable(main main.cpp)
+add_executable(main ./main.cpp
+                    ./interface.h
+                    ./catch.hpp
+                    headers/tree.h)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
