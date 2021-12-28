@@ -1,34 +1,33 @@
 #include <iostream>
 #include <string>
-#include "headers/Tree.h"
+#include "interface.h"
 
 using std::string;
 
 int main(int, char**) {
     std::cout << "Hello, world!\n";
 
-    Tree<string> tree("Uspeshnia");
-    tree.insert("Gosho", "Uspeshnia");
-    tree.insert("Misho", "Uspeshnia");
-    tree.insert("Slavi", "Uspeshnia");
-    tree.insert("Pesho", "Gosho");
-    tree.insert("Dancho", "Gosho");
-    tree.insert("Alex", "Pesho");
-    tree.insert("Boris", "Dancho");
-    tree.insert("Kamen", "Dancho");
-    tree.insert("Slav1", "Slavi");
-    tree.insert("Slav2", "Slavi");
-    tree.insert("Mecho", "Slav1");
-    tree.insert("Q12AD1", "Mecho");
+    Hierarchy h("Uspeshnia");
+    h.hire("Gosho", "Uspeshnia");
+    h.hire("Misho", "Uspeshnia");
+    h.hire("Slavi", "Uspeshnia");
+    h.hire("Pesho", "Gosho");
+    h.hire("Dancho", "Gosho");
+    h.hire("Alex", "Pesho");
+    h.hire("Boris", "Dancho");
+    h.hire("Kamen", "Dancho");
+    h.hire("Slav1", "Slavi");
+    h.hire("Slav2", "Slavi");
+    h.hire("Mecho", "Slav1");
+    h.hire("Q12AD1", "Mecho");
 
-    std::cout << tree.findAllDirectChilds("Dancho") << std::endl;
-    std::cout << tree.findAllDirectChilds("Uspeshnia") << std::endl;
-    std::cout << tree.findAllDirectChilds("Uspesh") << std::endl;
-    std::cout << tree.findAllDirectChilds("Slavi") << std::endl;
-    std::cout << tree.getHeight() << std::endl;
-
-    tree.print();
-
+    std::cout << h.getSalary("Uspeshnia") << std::endl;
+    std::cout << h.getSalary("Q12AD1") << std::endl;
+    std::cout << h.getSalary("Mecho") << std::endl;
+    std::cout << h.getSalary("Mech") << std::endl;
+    string result = h.print();
+    std::cout << std::endl;
+    std::cout << result;
 
     return 0;
 }

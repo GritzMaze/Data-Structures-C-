@@ -33,7 +33,7 @@ private:
     int findAllChilds(const Node<DataType> *) const;
     int findAllDirectChilds(const Node<DataType> *) const;
     bool insert(const DataType &, const DataType &, Node<DataType> *&);
-    void printByLevels(const Node<DataType> *) const;
+    DataType printByLevels(const Node<DataType> *) const;
 
 public:
     Tree() : root(nullptr), size(0) {}
@@ -54,7 +54,7 @@ public:
     bool isEmpty() const;
 
     bool insert(const DataType &, const DataType &);
-    void print() const;
+    DataType print() const;
 };
 
 template <class DataType>
@@ -321,10 +321,11 @@ bool Tree<DataType>::insert(const DataType &data, const DataType &name, Node<Dat
 // }
 
 template <class DataType>
-void Tree<DataType>::printByLevels(const Node<DataType> *root) const
+DataType Tree<DataType>::printByLevels(const Node<DataType> *root) const
 {
+    DataType result = "";
     if (!root)
-        return;
+        return "";
     std::queue<const Node<DataType> *> front;
     front.push(root);
     front.push(nullptr);
@@ -335,12 +336,14 @@ void Tree<DataType>::printByLevels(const Node<DataType> *root) const
         if (!current)
         {
             std::cout << '\n';
+            result.push_back('\n');
             if (front.empty())
-                return;
+                return "";
             front.push(nullptr);
         }
         else
         {
+            result.push_back(current->data);
             std::cout << current->data << ' ';
             for (const Node<DataType> *it = current->child; it; it = it->siblings)
             {
@@ -348,12 +351,13 @@ void Tree<DataType>::printByLevels(const Node<DataType> *root) const
             }
         }
     }
+    return result;
 }
 
 template <class DataType>
-void Tree<DataType>::print() const
+DataType Tree<DataType>::print() const
 {
-    printByLevels(root);
+    return printByLevels(root);
 }
 
 template <class DataType>

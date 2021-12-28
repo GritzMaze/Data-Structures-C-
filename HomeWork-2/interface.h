@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "headers/Tree.h"
+#include "headers/stringTree.h"
 
 using std::string;
 
@@ -34,6 +34,6 @@ public:
 
     //If you need it - add more public methods here
 private:
-    Tree<string> tree;
+    Tree* tree;
     //Add whatever you need here
 };
