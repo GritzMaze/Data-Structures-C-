@@ -26,9 +26,12 @@ private:
     void clear(Node<DataType> *);
 
     bool find(const DataType &, Node<DataType> *) const;
+    Node<DataType> *findSubtree(const DataType &, Node<DataType> *) const;
     bool remove(const DataType &, Node<DataType> *&);
 
     int height(const Node<DataType> *) const;
+    int findAllChilds(const Node<DataType> *) const;
+    int findAllDirectChilds(const Node<DataType> *) const;
     bool insert(const DataType &, const DataType &, Node<DataType> *&);
     void printByLevels(const Node<DataType> *) const;
 
@@ -44,6 +47,8 @@ public:
     bool find(const DataType &) const;
     bool remove(const DataType &);
 
+    int findAllChilds(const DataType &) const;
+    int findAllDirectChilds(const DataType &) const;
     int getHeight() const;
     int getSize() const;
     bool isEmpty() const;
@@ -175,6 +180,25 @@ bool Tree<DataType>::find(const DataType &data, Node<DataType> *node) const
 }
 
 template <class DataType>
+Node<DataType> *Tree<DataType>::findSubtree(const DataType &data, Node<DataType> *node) const
+{
+    if (node == nullptr)
+    {
+        return nullptr;
+    }
+    if (node->data == data)
+    {
+        return node;
+    }
+    Node<DataType> *result = findSubtree(data, node->child);
+    if (result == nullptr)
+    {
+        result = findSubtree(data, node->siblings);
+    }
+    return result;
+}
+
+template <class DataType>
 bool Tree<DataType>::remove(const DataType &data, Node<DataType> *&root)
 {
     if (root == nullptr)
@@ -219,6 +243,26 @@ int Tree<DataType>::height(const Node<DataType> *node) const
 }
 
 template <class DataType>
+int Tree<DataType>::findAllChilds(const Node<DataType> *node) const
+{
+    if (node == nullptr)
+    {
+        return 0;
+    }
+    return 1 + findAllChilds(node->child) + findAllChilds(node->siblings);
+}
+
+template <class DataType>
+int Tree<DataType>::findAllDirectChilds(const Node<DataType> *node) const
+{
+    if (node == nullptr)
+    {
+        return 0;
+    }
+    return 1 + findAllDirectChilds(node->siblings);
+}
+
+template <class DataType>
 bool Tree<DataType>::insert(const DataType &data, const DataType &name)
 {
     return insert(data, name, root);
@@ -257,21 +301,51 @@ bool Tree<DataType>::insert(const DataType &data, const DataType &name, Node<Dat
     return false;
 }
 
+// template <class DataType>
+// void Tree<DataType>::printByLevels(const Node<DataType>* root) const
+// {
+//     if (root == nullptr)
+//     {
+//         return;
+//     }
+//     else
+//     {
+//         while (root)
+//         {
+//             std::cout << " " << root->data;
+//             if (root->child)
+//                 printByLevels(root->child); // First, if child exists, traverse child.
+//             root = root->siblings;  // Next, traverse sibling
+//         }
+//     }
+// }
+
 template <class DataType>
-void Tree<DataType>::printByLevels(const Node<DataType>* root) const
+void Tree<DataType>::printByLevels(const Node<DataType> *root) const
 {
-    if (root == nullptr)
-    {
+    if (!root)
         return;
-    }
-    else
+    std::queue<const Node<DataType> *> front;
+    front.push(root);
+    front.push(nullptr);
+    for (;;)
     {
-        while (root)
+        const Node<DataType> *current = front.front();
+        front.pop();
+        if (!current)
         {
-            std::cout << " " << root->data;
-            if (root->child)
-                printByLevels(root->child); // First, if child exists, traverse child. No return statement following here.
-            root = root->siblings;  // Next, traverse sibling
+            std::cout << '\n';
+            if (front.empty())
+                return;
+            front.push(nullptr);
+        }
+        else
+        {
+            std::cout << current->data << ' ';
+            for (const Node<DataType> *it = current->child; it; it = it->siblings)
+            {
+                front.push(it);
+            }
         }
     }
 }
@@ -280,4 +354,26 @@ template <class DataType>
 void Tree<DataType>::print() const
 {
     printByLevels(root);
+}
+
+template <class DataType>
+int Tree<DataType>::findAllChilds(const DataType &name) const
+{
+    Node<DataType> *temp = findSubtree(name, root);
+    return findAllChilds(temp) - 1;
+}
+
+template <class DataType>
+int Tree<DataType>::findAllDirectChilds(const DataType &name) const
+{
+    Node<DataType> *temp = findSubtree(name, root);
+    try {
+    if(!temp) throw std::invalid_argument("No such name");
+    }
+    catch(std::invalid_argument &e) {
+        std::cout << e.what() << '\n';
+        return 0;
+    }
+    int result = findAllDirectChilds(temp->child);
+    return (result < 0 ? 0 : result);
 }

@@ -21,6 +21,12 @@ int main(int, char**) {
     tree.insert("Mecho", "Slav1");
     tree.insert("Q12AD1", "Mecho");
 
+    std::cout << tree.findAllDirectChilds("Dancho") << std::endl;
+    std::cout << tree.findAllDirectChilds("Uspeshnia") << std::endl;
+    std::cout << tree.findAllDirectChilds("Uspesh") << std::endl;
+    std::cout << tree.findAllDirectChilds("Slavi") << std::endl;
+    std::cout << tree.getHeight() << std::endl;
+
     tree.print();
 
 
