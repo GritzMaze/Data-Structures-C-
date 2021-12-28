@@ -80,7 +80,7 @@ Node *Tree::copy(Node *other)
     {
         return nullptr;
     }
-    Node *newNode = new Node(other->data, copy(other->child), copy(other->siblings));
+    Node *newNode = new Node(other->data, other->parent, copy(other->child), copy(other->siblings));
     return newNode;
 }
 
@@ -202,18 +202,19 @@ bool Tree::insert(const string &data, const string &name, Node *&root)
     {
         if (root->child == nullptr)
         {
-            root->child = new Node(data);
+            root->child = new Node(data, root->data);
             size++;
             return true;
         }
         else
         {
             Node *child = root->child;
+            string temp = root->data;
             while (child->siblings != nullptr)
             {
                 child = child->siblings;
             }
-            child->siblings = new Node(data);
+            child->siblings = new Node(data, temp);
         }
     }
     else
@@ -313,4 +314,40 @@ int Tree::findAllDirectChilds(const string &name) const
     }
     int result = findAllDirectChilds(temp->child);
     return (result < 0 ? 0 : result);
+}
+
+
+string Tree::findParent(const string& name) const {
+    return findParent(name, root);
+}
+
+string Tree::findParent(const string& name, Node* node) const {
+    Node* temp = findSubtree(name, root);
+
+    try {
+        if (!temp)
+            throw std::invalid_argument("No such name");
+    }
+    catch (std::invalid_argument &e) {
+        std::cout << e.what() << '\n';
+        return "";
+    }
+    string result = temp->parent;
+    return result;
+}
+
+int Tree::findMoreThanNthChilds(const int& n) const {
+    
+    return findMoreThanNthChilds(n, root);
+}
+
+int Tree::findMoreThanNthChilds(const int& n, const Node* root) const {
+    if(root == nullptr)
+        return 0;
+
+    if(findAllDirectChilds(root->child) > n)
+    {
+        return 1 + findMoreThanNthChilds(n, root->child) + findMoreThanNthChilds(n, root->siblings);
+    }
+    else return findMoreThanNthChilds(n, root->child) + findMoreThanNthChilds(n, root->siblings);
 }

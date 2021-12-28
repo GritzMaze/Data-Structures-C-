@@ -27,7 +27,15 @@ int main(int, char**) {
     std::cout << h.getSalary("Mech") << std::endl;
     string result = h.print();
     std::cout << std::endl;
-    std::cout << result;
+
+    std::cout << h.manager("Misho") <<std::endl;
+    std::cout << h.manager("Mecho") <<std::endl;
+    std::cout << h.manager("Mec") <<std::endl;
+
+    std::cout << h.num_overloaded(1) <<std::endl;
+    std::cout << h.num_overloaded(2) <<std::endl;
+    std::cout << h.num_overloaded(3) <<std::endl;
+
 
     return 0;
 }

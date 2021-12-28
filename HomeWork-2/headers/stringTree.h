@@ -11,8 +11,9 @@ struct Node
     string data;
     Node *child;
     Node *siblings;
-    Node(const string &data, Node *child = nullptr, Node *siblings = nullptr)
-        : data(data), child(child), siblings(siblings) {}
+    string parent;
+    Node(const string &data, string parent = "", Node *child = nullptr, Node *siblings = nullptr)
+        : data(data), child(child), siblings(siblings), parent(parent) {}
 };
 
 class Tree
@@ -31,6 +32,8 @@ private:
     int height(const Node *) const;
     int findAllChilds(const Node *) const;
     int findAllDirectChilds(const Node *) const;
+    int findMoreThanNthChilds(const int&, const Node*) const;
+    string findParent(const string &, Node *) const;
     bool insert(const string &, const string &, Node *&);
     string printByLevels(const Node *) const;
 
@@ -48,9 +51,11 @@ public:
 
     int findAllChilds(const string &) const;
     int findAllDirectChilds(const string &) const;
+    int findMoreThanNthChilds(const int&) const;
     int getHeight() const;
     int getSize() const;
     bool isEmpty() const;
+    string findParent(const string&) const;
 
     bool insert(const string &, const string &);
     string print() const;
