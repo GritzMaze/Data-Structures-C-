@@ -159,6 +159,35 @@ bool Tree::remove(const string &data, Node *&root)
     return remove(data, root->child) || remove(data, root->siblings);
 }
 
+bool Tree::removeLink(const string &data, Node *&root)
+{
+    if (root == nullptr)
+    {
+        return false;
+    }
+
+    // If data is found
+    if (root->child->data == data)
+    {
+        root->child = root->child->siblings;
+        return true;
+    }
+    else
+    {
+        Node *child = root->child;
+        while (child->siblings != nullptr)
+        {
+            if (child->siblings->data == data)
+            {
+                child->siblings = child->siblings->siblings;
+                return true;
+            }
+            child = child->siblings;
+        }
+    }
+    return remove(data, root->child) || remove(data, root->siblings);
+}
+
 int Tree::height(const Node *node) const
 {
     if (node == nullptr)
@@ -214,12 +243,57 @@ bool Tree::insert(const string &data, const string &name, Node *&root)
             {
                 child = child->siblings;
             }
+            size++;
             child->siblings = new Node(data, temp);
         }
     }
     else
     {
         return insert(data, name, root->child) || insert(data, name, root->siblings);
+    }
+    return false;
+}
+
+bool Tree::reasign(const string &data, const string &name)
+{
+    Node *subTree = findSubtree(data, root);
+    return reasign(data, name, subTree, root);
+}
+
+bool Tree::reasign(const string &data, const string &name, Node *&subTree, Node *&root)
+{
+    if (root == nullptr)
+    {
+        return false;
+    }
+    Node *parent = findSubtree(subTree->parent, this->root);
+
+    if (root->data == name)
+    {
+        if (root->child == nullptr)
+        {
+            root->child = subTree;
+            removeLink(data, parent);
+            subTree->parent = root->data;
+            return true;
+        }
+        else
+        {
+            Node *child = root->child;
+            string temp = root->data;
+            while (child->siblings != nullptr)
+            {
+                child = child->siblings;
+            }
+            child->siblings = subTree;
+            removeLink(data, parent);
+            subTree->parent = root->data;
+            return true;
+        }
+    }
+    else
+    {
+        return reasign(data, name, subTree, root->child) || reasign(data, name, subTree, root->siblings);
     }
     return false;
 }
@@ -316,19 +390,22 @@ int Tree::findAllDirectChilds(const string &name) const
     return (result < 0 ? 0 : result);
 }
 
-
-string Tree::findParent(const string& name) const {
+string Tree::findParent(const string &name) const
+{
     return findParent(name, root);
 }
 
-string Tree::findParent(const string& name, Node* node) const {
-    Node* temp = findSubtree(name, root);
+string Tree::findParent(const string &name, Node *node) const
+{
+    Node *temp = findSubtree(name, root);
 
-    try {
+    try
+    {
         if (!temp)
             throw std::invalid_argument("No such name");
     }
-    catch (std::invalid_argument &e) {
+    catch (std::invalid_argument &e)
+    {
         std::cout << e.what() << '\n';
         return "";
     }
@@ -336,18 +413,21 @@ string Tree::findParent(const string& name, Node* node) const {
     return result;
 }
 
-int Tree::findMoreThanNthChilds(const int& n) const {
-    
+int Tree::findMoreThanNthChilds(const int &n) const
+{
+
     return findMoreThanNthChilds(n, root);
 }
 
-int Tree::findMoreThanNthChilds(const int& n, const Node* root) const {
-    if(root == nullptr)
+int Tree::findMoreThanNthChilds(const int &n, const Node *root) const
+{
+    if (root == nullptr)
         return 0;
 
-    if(findAllDirectChilds(root->child) > n)
+    if (findAllDirectChilds(root->child) > n)
     {
         return 1 + findMoreThanNthChilds(n, root->child) + findMoreThanNthChilds(n, root->siblings);
     }
-    else return findMoreThanNthChilds(n, root->child) + findMoreThanNthChilds(n, root->siblings);
+    else
+        return findMoreThanNthChilds(n, root->child) + findMoreThanNthChilds(n, root->siblings);
 }

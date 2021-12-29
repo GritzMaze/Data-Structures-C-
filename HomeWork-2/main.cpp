@@ -37,5 +37,13 @@ int main(int, char**) {
     std::cout << h.num_overloaded(3) <<std::endl;
 
 
+    std::cout << h.hire("Dancho", "Slav1") << std::endl;
+    std::cout << h.hire("Dancho", "Uspeshn") << std::endl;
+
+    h.print();
+
+    Hierarchy h2("");
+    string h5 = h2.print();
+    std::cout << h2.num_employees() << std::endl;
     return 0;
 }

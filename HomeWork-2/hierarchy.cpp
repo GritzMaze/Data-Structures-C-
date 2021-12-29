@@ -38,7 +38,10 @@ bool Hierarchy::find(const string &name) const
 
 int Hierarchy::num_employees() const
 {
-    return tree->findAllChilds("Uspeshnia");
+    if(find("Uspeshnia"))
+        return tree->getSize();
+    
+    return 0;
 }
 
 int Hierarchy::num_overloaded(int level) const
@@ -56,7 +59,6 @@ int Hierarchy::num_subordinates(const string &name) const
     return tree->findAllDirectChilds(name);
 }
 
-// ne e gotovo
 unsigned long Hierarchy::getSalary(const string &who) const
 {
     try
@@ -103,22 +105,15 @@ bool Hierarchy::hire(const string &who, const string &boss)
     {
         if (tree->findAllChilds(who) == 0)
         {
-
-            if (tree->insert(who, boss))
-            {
-                tree->remove(who);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            tree->remove(who);
+            return tree->insert(who, boss);
         }
         else
         {
-            return false;
+            return tree->reasign(who, boss);
         }
     }
+    return false;
 }
 
 // ne e gotovo
