@@ -13,21 +13,60 @@ Hierarchy::Hierarchy(const Hierarchy &r)
 
 Hierarchy::Hierarchy(const string &data)
 {
-    tree = new Tree(data);
+    if (data.empty())
+    {
+        tree = new Tree("");
+        return;
+    }
+    tree = new Tree("Uspeshnia");
+    std::stringstream ss(data);
+    string line;
+    while (getline(ss, line))
+    {
+        if (line.empty())
+            continue;
+
+        if (!(countWords(line) > 0 && countWords(line) <= 3 && countDel(line, '-') == 1))
+        {
+            throw std::invalid_argument("Invalid input");
+        }
+
+        line.erase(std::remove_if(line.begin(), line.end(), [](unsigned char x)
+                                  { return std::isspace(x); }),
+                   line.end());
+        std::replace(line.begin(), line.end(), '-', ' ');
+        std::stringstream line_s(line);
+        string name;
+        string boss;
+        line_s >> boss >> name;
+        if (!tree->find(boss))
+        {
+            throw std::invalid_argument("No such boss");
+        }
+        tree->insert(name, boss);
+    }
 }
 
 Hierarchy::~Hierarchy() noexcept
 {
     delete tree;
+    tree = nullptr;
 }
 
 string Hierarchy::print() const
 {
+    // if(tree->getSize() == 1) {
+    //     return "";
+    // }
     return tree->print();
 }
 
 int Hierarchy::longest_chain() const
 {
+    if (tree->getSize() == 1)
+    {
+        return 0;
+    }
     return tree->getHeight();
 }
 
@@ -38,9 +77,9 @@ bool Hierarchy::find(const string &name) const
 
 int Hierarchy::num_employees() const
 {
-    if(find("Uspeshnia"))
+    if (find("Uspeshnia"))
         return tree->getSize();
-    
+
     return 0;
 }
 
@@ -61,21 +100,7 @@ int Hierarchy::num_subordinates(const string &name) const
 
 unsigned long Hierarchy::getSalary(const string &who) const
 {
-    try
-    {
-        if (!tree->find(who))
-        {
-            throw std::invalid_argument("No such employer");
-        }
-    }
-    catch (std::invalid_argument &e)
-    {
-        std::cout << e.what() << '\n';
-        return -1;
-    }
-    int directChilds = tree->findAllDirectChilds(who);
-    int notDirectChilds = tree->findAllChilds(who) - directChilds;
-    return directChilds * 500 + notDirectChilds * 50;
+    return tree->getSalary(who);
 }
 
 bool Hierarchy::fire(const string &who)
@@ -119,12 +144,14 @@ bool Hierarchy::hire(const string &who, const string &boss)
 // ne e gotovo
 void Hierarchy::incorporate()
 {
+    //return tree->incorporate();
     //tree.insert("Uspeshnia", "Uspeshnia");
 }
 
 // ne e gotovo
 void Hierarchy::modernize()
 {
+    tree->modernize();
     //tree.insert("Uspeshnia", "Uspeshnia");
 }
 
@@ -132,7 +159,52 @@ void Hierarchy::modernize()
 Hierarchy Hierarchy::join(const Hierarchy &right) const
 {
     //tree.insert("Uspeshnia", "Uspeshnia");
-    Hierarchy h("Uspeshnia");
+    //Hierarchy h("Uspeshnia");
 
     return *this;
+}
+
+int Hierarchy::getLevel(const string &name) const
+{
+    return tree->getLevel(name);
+}
+
+unsigned Hierarchy::countWords(const string &str) const
+{
+    if (str.empty())
+        return 0;
+
+    bool inSpaces = true;
+    unsigned count = 0;
+
+    for (int i = 0; i < str.length(); i++)
+    {
+        if (isspace(str[i]))
+        {
+            inSpaces = true;
+        }
+        else if (inSpaces)
+        {
+            inSpaces = false;
+            count++;
+        }
+    }
+    return count;
+}
+
+unsigned Hierarchy::countDel(const string &str, char ch) const
+{
+    if (str.empty())
+        return 0;
+
+    unsigned count = 0;
+
+    for (int i = 0; i < str.length(); i++)
+    {
+        if (str[i] == ch)
+        {
+            count++;
+        }
+    }
+    return count;
 }

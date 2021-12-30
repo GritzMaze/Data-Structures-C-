@@ -1,5 +1,7 @@
 #pragma once
 #include <string>
+#include <sstream>
+#include <algorithm>
 #include "headers/stringTree.h"
 
 using std::string;
@@ -33,7 +35,11 @@ public:
     Hierarchy join(const Hierarchy &right) const;
 
     //If you need it - add more public methods here
+    int getLevel(const string &name) const;
 private:
     Tree* tree;
     //Add whatever you need here
+
+    unsigned countWords(const string &str) const;
+    unsigned countDel(const string &str, char ch) const;
 };
