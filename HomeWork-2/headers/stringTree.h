@@ -40,10 +40,11 @@ private:
     string printByLevels(const Node *) const;
     string printAllOnLevel(const int &, string, const Node *) const;
     int getLevel(const string&, Node*) const;
-    void sortChilds(Node*&);
+    void sortChilds(Node*);
     void incorporate(Node*);
     void makeBoss(const string&, Node*);
     void modernize(int , Node*);
+    Tree join(const Node*, const Node*, const Tree*, const Tree*) const;
 
 public:
     Tree() : root(nullptr), size(0) {}
@@ -63,12 +64,15 @@ public:
     int getHeight() const;
     int getSize() const;
     int getLevel(const string &) const;
+    Node* getRoot() const;
+    string getParent(const string &);
     bool isEmpty() const;
     string findParent(const string&);
     bool reasign(const string&, const string&);
     void incorporate();
     unsigned long getSalary(const string&);
     void modernize();
+    Tree join(const Tree*) const;
 
     bool insert(const string &, const string &);
     string print() const;

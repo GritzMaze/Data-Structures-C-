@@ -142,11 +142,9 @@ bool Hierarchy::hire(const string &who, const string &boss)
     return false;
 }
 
-// ne e gotovo
 void Hierarchy::incorporate()
 {
-    //return tree->incorporate();
-    //tree.insert("Uspeshnia", "Uspeshnia");
+    return tree->incorporate();
 }
 
 
@@ -161,6 +159,7 @@ Hierarchy Hierarchy::join(const Hierarchy &right) const
     //tree.insert("Uspeshnia", "Uspeshnia");
     //Hierarchy h("Uspeshnia");
 
+    tree->join(right.getTree());
     return *this;
 }
 
@@ -207,4 +206,9 @@ unsigned Hierarchy::countDel(const string &str, char ch) const
         }
     }
     return count;
+}
+
+Tree *Hierarchy::getTree() const
+{
+    return tree;
 }

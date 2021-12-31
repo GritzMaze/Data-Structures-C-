@@ -51,10 +51,10 @@ const string lozenec =
     "Uspeshnia - Gosho \n"
     "Uspeshnia - Misho \n"
     "Gosho     - Pesho \n"
-    "Gosho     - Dancho\n"
+    "Gosho     - Zancho\n"
     "Pesho     - Alex  \n"
-    "Dancho    - Boris \n"
-    "Dancho    - Kamen \n"
+    "Zancho    - Boris \n"
+    "Zancho    - Kamen \n"
     "Uspeshnia - Slavi \n"
     "Slavi     - Slav1 \n"
     "Slavi     - Slav2 \n"
@@ -74,12 +74,13 @@ const string loz_new =
 
     // Hierarchy h(loz_new);
     // Hierarchy h2(large);
-    Hierarchy h3(lozenec);
+    Hierarchy h3(large);
 
     string str1 = "Dancho";
     string str2 = "Pesho";
-     //h3.modernize();
-    h3.hire("Slav1", "Dancho");
+    h3.print();
+     h3.incorporate();
+    // h3.hire("Slav1", "Dancho");
     h3.print();
 
     return 0;

@@ -174,7 +174,7 @@ bool Tree::removeLink(const string &data, Node *&root)
     // If data is found
     if (root->child->data == data)
     {
-        Node* temp = root->child;
+        Node *temp = root->child;
         root->child = root->child->siblings;
         temp->siblings = nullptr;
         return true;
@@ -186,7 +186,7 @@ bool Tree::removeLink(const string &data, Node *&root)
         {
             if (child->siblings->data == data)
             {
-                Node* temp = child->siblings;
+                Node *temp = child->siblings;
                 child->siblings = child->siblings->siblings;
                 temp->siblings = nullptr;
                 return true;
@@ -295,7 +295,7 @@ bool Tree::reasign(const string &data, const string &name, Node *&subTree, Node 
 
     if (root->data == name)
     {
-    Node *parent = findSubtree(subTree->parent, this->root);
+        Node *parent = findSubtree(subTree->parent, this->root);
         if (root->child == nullptr)
         {
             root->child = subTree;
@@ -460,7 +460,7 @@ int Tree::getLevel(const string &name, Node *node) const
     return getLevel(name, node->siblings);
 }
 
-void Tree::sortChilds(Node *&root)
+void Tree::sortChilds(Node *root)
 {
     if (root == nullptr)
         return;
@@ -470,33 +470,35 @@ void Tree::sortChilds(Node *&root)
     Node *child = root->child;
     Node *temp;
 
-    if(child->siblings == nullptr)
+    if (child->siblings == nullptr)
         return;
 
     if (child->data > child->siblings->data)
     {
         temp = child->siblings;
-        child->siblings = child;
-        child = temp;
+        child->siblings = child->siblings->siblings;
+        temp->siblings = child;
+        root->child = temp;
         flag = false;
     }
-    else {
-        Node* prev = nullptr;
-    while (child->siblings != nullptr)
+    else
     {
-        if (child->data > child->siblings->data)
+        Node *prev = nullptr;
+        while (child->siblings != nullptr)
         {
+            if (child->data > child->siblings->data)
+            {
 
-            flag = false;
-            // Swap nodes
-            prev->siblings = child->siblings;
-            child->siblings = child->siblings->siblings;
-            prev->siblings->siblings = child;
-            break;
+                flag = false;
+                // Swap nodes
+                prev->siblings = child->siblings;
+                child->siblings = child->siblings->siblings;
+                prev->siblings->siblings = child;
+                break;
+            }
+            prev = child;
+            child = child->siblings;
         }
-        prev = child;
-        child = child->siblings;
-    }
     }
     if (flag)
         return;
@@ -514,13 +516,18 @@ void Tree::incorporate(Node *root)
         return;
     incorporate(root->child);
     incorporate(root->siblings);
-     Node *toPromote = root;
-     Node *child = root;
-    if(!child->siblings) return;
+    Node *toPromote = root;
+    Node *child = root;
+    if (!child->siblings)
+        return;
+
+    if (root->data != findSubtree(findParent(root->data), this->root)->child->data)
+        return;
+
     while (child->siblings != nullptr)
     {
 
-        if (getSalary(toPromote->data) < getSalary(child->data))
+        if (getSalary(toPromote->data) < getSalary(child->siblings->data))
         {
             toPromote = child->siblings;
         }
@@ -551,62 +558,84 @@ unsigned long Tree::getSalary(const string &name)
 void Tree::makeBoss(const string &name, Node *root)
 {
     string parent;
+
     // if its left child
-    if(root->child->data == name) {
-        root->child->child = root->child->siblings;
-        root->siblings = nullptr;
-        
-        if(root->child->child)
+    if (root->child->data == name)
+    {
+
+        parent = root->child->data;
+        if (root->child->child)
         {
-            Node* child = root->child->child;
-            parent = child->parent;
-            while(child->siblings)
+            root->child->child->siblings = root->child->siblings;
+            root->child->siblings = nullptr;
+            if (root->child->child->siblings)
+                sortChilds(root->child);
+        }
+        else
+        {
+            root->child->child = root->child->siblings;
+            root->child->child->parent = root->child->data;
+            root->child->siblings = nullptr;
+        }
+        Node *child = root->child->child;
+            while (child)
             {
                 child->parent = parent;
                 child = child->siblings;
             }
-        }
         return;
     }
 
-
     // if it is in the right siblings
     Node *child = root->child;
-    Node *child_f = root->child;
-    while(child->siblings != nullptr) {
-        if(child->siblings->data == name) { // if the next child is the needed one
-            child->siblings->child = child_f;  // Making it the parrent
-            parent = child->siblings->data; // Saving the parent
-            child->siblings = child->siblings->siblings; // Setting the current child to the +1 child 
-            child->siblings->siblings = nullptr; //Setting the now parent's siblings to nullptr
+    while (child->siblings)
+    {
+        if (child->siblings->data == name)
+        { // if the next child is the needed one
+            Node *temp = child->siblings;
+            parent = temp->data;                         // Saving the parent
+            child->siblings = child->siblings->siblings; // Making it the parrent
+            root->child = temp;                          // setting the new child
+            // child->siblings = child->siblings->siblings; // Setting the current child to the +1 child
+            temp->siblings = nullptr; //Setting the now parent's siblings to nullptr
+            root->child->child->siblings = child;
+
             break;
         }
         child = child->siblings;
     }
 
-    Node* child_i = child_f;
-    while(child_i->siblings != nullptr) {
+    Node *child_i = root->child->child;
+    while (child_i)
+    {
         child_i->parent = parent;
         child_i = child_i->siblings;
     }
+    if(root->child->child->siblings)
+        sortChilds(root->child);
     return;
 }
 
-void Tree::modernize() {
+void Tree::modernize()
+{
     modernize(0, root);
 }
 
-void Tree::modernize(int level, Node *root) {
-    if(root == nullptr) return;
+void Tree::modernize(int level, Node *root)
+{
+    if (root == nullptr)
+        return;
     modernize(level + 1, root->child);
     modernize(level, root->siblings);
-    if(root->child != nullptr && level % 2 != 0 && root->data != "Uspeshnia") {
+    if (root->child != nullptr && level % 2 != 0 && root->data != "Uspeshnia")
+    {
         std::cout << root->data << " was removed" << std::endl;
         remove(root->data);
     }
 }
 
-string Tree::print2() const {
+string Tree::print2() const
+{
     return print2(root);
 }
 
@@ -642,4 +671,39 @@ string Tree::print2(const Node *root) const
         }
     }
     return result;
+}
+
+Tree Tree::join(const Tree* tree) const
+{
+    Tree result("Uspeshnia");
+    if(!tree->getRoot() || !root)
+        return Tree("");
+    result.join(tree->getRoot(), root, tree, const_cast <Tree*> (this));
+    return result;
+}
+
+
+// Join two trees
+Tree Tree::join(const Node* f_root, const Node *s_root, const Tree* f_tree, const Tree* s_tree) const
+{
+    const Node* current_employee = f_root;
+    if(s_tree->find(current_employee->data)) {
+        int level_f_tree = f_tree->getLevel(current_employee->data);
+        int level_s_tree = s_tree->getLevel(current_employee->data);
+        if(level_f_tree > level_s_tree) {
+            insert(current_employee->data, current_employee->parent);
+        }
+    }
+
+    return Tree("Iskustvo");
+}
+
+string Tree::getParent(const string &name)
+{
+    return findParent(name, root);
+}
+
+Node* Tree::getRoot() const
+{
+    return root;
 }

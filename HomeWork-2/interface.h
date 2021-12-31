@@ -36,6 +36,7 @@ public:
 
     //If you need it - add more public methods here
     int getLevel(const string &name) const;
+    Tree *getTree() const;
 private:
     Tree* tree;
     //Add whatever you need here
