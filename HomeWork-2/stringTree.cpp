@@ -136,29 +136,25 @@ bool Tree::remove(const string &data, Node *&root)
     // If data is found
     if (root->data == data)
     {
-        Node *temp = root;
         // If root has no children
         if (root->child == nullptr)
         {
+            Node *temp = root;
             root = root->siblings;
+            delete temp;
         }
         else
         { // If root has children
             Node *child = root->child;
             string par = root->parent;
+            child->parent = par;
             while (child->siblings != nullptr)
             { // Find the last child
+                child->siblings->parent = par;
                 child = child->siblings;
             }
             child->siblings = root->siblings; // Set the last child's sibling to root's sibling
             root = root->child;               // Up a level
-            delete temp;
-            Node *temp = root;
-            while (temp->siblings != nullptr)
-            {
-                temp->parent = par;
-                temp = temp->siblings;
-            }
             Node *parent = findSubtree(par, this->root);
             sortChilds(parent);
         }
@@ -178,7 +174,9 @@ bool Tree::removeLink(const string &data, Node *&root)
     // If data is found
     if (root->child->data == data)
     {
+        Node* temp = root->child;
         root->child = root->child->siblings;
+        temp->siblings = nullptr;
         return true;
     }
     else
@@ -188,13 +186,15 @@ bool Tree::removeLink(const string &data, Node *&root)
         {
             if (child->siblings->data == data)
             {
+                Node* temp = child->siblings;
                 child->siblings = child->siblings->siblings;
+                temp->siblings = nullptr;
                 return true;
             }
             child = child->siblings;
         }
     }
-    return remove(data, root->child) || remove(data, root->siblings);
+    return removeLink(data, root->child) || removeLink(data, root->siblings);
 }
 
 int Tree::height(const Node *node) const
@@ -292,10 +292,10 @@ bool Tree::reasign(const string &data, const string &name, Node *&subTree, Node 
     {
         return false;
     }
-    Node *parent = findSubtree(subTree->parent, this->root);
 
     if (root->data == name)
     {
+    Node *parent = findSubtree(subTree->parent, this->root);
         if (root->child == nullptr)
         {
             root->child = subTree;
@@ -481,15 +481,20 @@ void Tree::sortChilds(Node *&root)
         flag = false;
     }
     else {
+        Node* prev = nullptr;
     while (child->siblings != nullptr)
     {
         if (child->data > child->siblings->data)
         {
 
             flag = false;
-            child = child->siblings;
+            // Swap nodes
+            prev->siblings = child->siblings;
+            child->siblings = child->siblings->siblings;
+            prev->siblings->siblings = child;
             break;
         }
+        prev = child;
         child = child->siblings;
     }
     }
@@ -594,8 +599,47 @@ void Tree::modernize() {
 void Tree::modernize(int level, Node *root) {
     if(root == nullptr) return;
     modernize(level + 1, root->child);
-    modernize(level + 1, root->siblings);
-    if(root->child != nullptr && level % 2 == 0) {
-        remove(root->child->data);
+    modernize(level, root->siblings);
+    if(root->child != nullptr && level % 2 != 0 && root->data != "Uspeshnia") {
+        std::cout << root->data << " was removed" << std::endl;
+        remove(root->data);
     }
+}
+
+string Tree::print2() const {
+    return print2(root);
+}
+
+string Tree::print2(const Node *root) const
+{
+    string result = "";
+    if (!root)
+        return result;
+    std::queue<const Node *> front;
+    front.push(root);
+    front.push(nullptr);
+    for (;;)
+    {
+        const Node *current = front.front();
+        front.pop();
+        if (!current)
+        {
+            std::cout << '\n';
+            result.push_back('\n');
+            if (front.empty())
+                return result;
+            front.push(nullptr);
+        }
+        else
+        {
+            result.append(current->data);
+            result.append(" ");
+            std::cout << current->data << ' ';
+            for (const Node *it = current->child; it; it = it->siblings)
+            {
+                front.push(it);
+            }
+        }
+    }
+    return result;
 }

@@ -72,4 +72,6 @@ public:
 
     bool insert(const string &, const string &);
     string print() const;
+    string print2() const;
+    string print2(const Node*) const;
 };

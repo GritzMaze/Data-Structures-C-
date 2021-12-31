@@ -78,7 +78,8 @@ const string loz_new =
 
     string str1 = "Dancho";
     string str2 = "Pesho";
-    h3.modernize();
+     //h3.modernize();
+    h3.hire("Slav1", "Dancho");
     h3.print();
 
     return 0;

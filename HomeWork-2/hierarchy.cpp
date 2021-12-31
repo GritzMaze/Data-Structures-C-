@@ -58,6 +58,7 @@ string Hierarchy::print() const
     // if(tree->getSize() == 1) {
     //     return "";
     // }
+    tree->print2();
     return tree->print();
 }
 
@@ -148,11 +149,10 @@ void Hierarchy::incorporate()
     //tree.insert("Uspeshnia", "Uspeshnia");
 }
 
-// ne e gotovo
+
 void Hierarchy::modernize()
 {
     tree->modernize();
-    //tree.insert("Uspeshnia", "Uspeshnia");
 }
 
 // ne e gotovo
