@@ -1,5 +1,5 @@
 #pragma once
-#include <string>
+#include <string.h>
 #include <sstream>
 #include <algorithm>
 #include "headers/stringTree.h"
@@ -37,9 +37,17 @@ public:
     //If you need it - add more public methods here
     int getLevel(const string &name) const;
     Tree *getTree() const;
+    string getName() const;
+    void setName(const string& name);
+    void setModified(bool);
+    bool isModified() const;
+    string getString() const;
+
 private:
     //Add whatever you need here
-    Tree* tree;
+    Tree *tree;
+    string name;
+    bool modified = false;
 
     unsigned countWords(const string &str) const;
     unsigned countDel(const string &str, char ch) const;

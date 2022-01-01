@@ -19,7 +19,9 @@ add_executable(main ./main.cpp
                     ./catch.hpp
                     ./hierarchy.cpp
                     headers/stringTree.h
-                    ./stringTree.cpp)
+                    ./stringTree.cpp
+                    ./commands.cpp
+                    ./commands.h)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

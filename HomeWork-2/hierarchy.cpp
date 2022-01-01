@@ -3,12 +3,14 @@
 Hierarchy::Hierarchy(Hierarchy &&r) noexcept
 {
     tree = r.tree;
+    name = r.name;
     r.tree = nullptr;
 }
 
 Hierarchy::Hierarchy(const Hierarchy &r)
 {
     tree = new Tree(*r.tree);
+    this->name = r.name;
 }
 
 Hierarchy::Hierarchy(const string &data)
@@ -67,6 +69,16 @@ int Hierarchy::longest_chain() const
     return tree->getHeight();
 }
 
+string Hierarchy::getName() const
+{
+    return this->name;
+}
+
+void Hierarchy::setName(const string& name)
+{
+    this->name = name;
+}
+
 bool Hierarchy::find(const string &name) const
 {
     return tree->find(name);
@@ -98,6 +110,21 @@ int Hierarchy::num_subordinates(const string &name) const
 unsigned long Hierarchy::getSalary(const string &who) const
 {
     return tree->getSalary(who);
+}
+
+string Hierarchy::getString() const
+{
+    return tree->toString();
+}
+
+void Hierarchy::setModified(bool modified)
+{
+    this->modified = modified;
+}
+
+bool Hierarchy::isModified() const
+{
+    return modified;
 }
 
 bool Hierarchy::fire(const string &who)
