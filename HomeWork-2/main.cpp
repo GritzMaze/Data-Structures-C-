@@ -51,10 +51,10 @@ const string lozenec =
     "Uspeshnia - Gosho \n"
     "Uspeshnia - Misho \n"
     "Gosho     - Pesho \n"
-    "Gosho     - Zancho\n"
+    "Gosho     - Dancho\n"
     "Pesho     - Alex  \n"
-    "Zancho    - Boris \n"
-    "Zancho    - Kamen \n"
+    "Dancho    - Boris \n"
+    "Dancho    - Kamen \n"
     "Uspeshnia - Slavi \n"
     "Slavi     - Slav1 \n"
     "Slavi     - Slav2 \n"
@@ -72,16 +72,58 @@ const string loz_new =
     " MishoPetrov -  Misho       \n"
     " MishoPetrov -  Slav        \n";
 
-    // Hierarchy h(loz_new);
-    // Hierarchy h2(large);
-    Hierarchy h3(large);
+const string from_discord1 = 
+    "Uspeshnia - A\n"
+    "A-B\nA-C\n"
+    "C-D\nC-F\n"
+    "D-Q\n";
+
+const string from_discord2 =
+    "Uspeshnia - A\n"
+    "A-B\nA-C\nA-D\n"
+    "B-F\n"
+    "D-Q\n";
+
+const string from_martin1 =
+    "Uspeshnia - A\n"
+    "A-B\nA-C\nA-D\n"
+    "B-1\nB-2\n"
+    "2-3\n2-4\n"
+    "3-5\n3-6\n";
+
+const string from_martin2 =
+    "Uspeshnia - A\n"
+    "A-2\nA-C\nA-D\nA-F\n"
+    "2-1\n2-3\n"
+    "3-5\n3-4\n";
+
+const string invalid_input1 = 
+    "Uspeshnia - A\n"
+    "A-B\nA-C\n"
+    "B-1\nB-2\n"
+    "1-3\n1-4\n";
+
+const string invalid_input2 = 
+    "Uspeshnia - A\n"
+    "A-4\nA-C\n"
+    "4-1\n4-2\n"
+    "1-3\n1-B\n";
+
+    Hierarchy h(loz_new);
+    Hierarchy h2(large);
+    Hierarchy h3(loz_new);
+    Hierarchy h4(lozenec);
+    Hierarchy h5(from_discord1);
+    Hierarchy h6(from_discord2);
+    Hierarchy h7(from_martin1);
+    Hierarchy h8(from_martin2);
+    Hierarchy h9(invalid_input1);
+    Hierarchy h10(invalid_input2);
 
     string str1 = "Dancho";
     string str2 = "Pesho";
-    h3.print();
-     h3.incorporate();
-    // h3.hire("Slav1", "Dancho");
-    h3.print();
+    Hierarchy test = h9.join(h10);
+    test.print();
 
     return 0;
 }

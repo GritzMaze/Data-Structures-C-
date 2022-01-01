@@ -6,6 +6,12 @@ Tree::Tree(const Tree &other)
     size = other.size;
 }
 
+Tree::Tree(const Tree *other)
+{
+    root = copy(other->root);
+    size = other->size;
+}
+
 Tree::Tree(Tree &&other)
 {
     root = other.root;
@@ -126,6 +132,11 @@ Node *Tree::findSubtree(const string &data, Node *node)
     return result;
 }
 
+Node *Tree::getSubtree(const string &data)
+{
+    return findSubtree(data, root);
+}
+
 bool Tree::remove(const string &data, Node *&root)
 {
     if (root == nullptr)
@@ -195,6 +206,38 @@ bool Tree::removeLink(const string &data, Node *&root)
         }
     }
     return removeLink(data, root->child) || removeLink(data, root->siblings);
+}
+
+bool Tree::rename(const string &data, const string &newName, Node *root)
+{
+    if (root == nullptr)
+    {
+        return false;
+    }
+
+    // If data is found
+    if (root->data == data)
+    {
+        // If root has no children
+        if (root->child == nullptr)
+        {
+            root->data = newName;
+        }
+        else
+        { // If root has children
+            Node *child = root->child;
+            string par = root->parent;
+            child->parent = newName;
+            while (child->siblings != nullptr)
+            { // Find the last child
+                child->siblings->parent = par;
+                child = child->siblings;
+            }
+            root->data = newName;
+        }
+        return true;
+    }
+    return rename(data, newName, root->child) || rename(data, newName, root->siblings);
 }
 
 int Tree::height(const Node *node) const
@@ -323,6 +366,20 @@ bool Tree::reasign(const string &data, const string &name, Node *&subTree, Node 
         return reasign(data, name, subTree, root->child) || reasign(data, name, subTree, root->siblings);
     }
     return false;
+}
+
+string Tree::toString() const
+{
+    string result = "";
+    if (!root)
+        return result;
+
+    int height = getHeight();
+    for (int i = 2; i <= height; i++)
+    {
+        result.append(printAllOnLevel(i, "", root));
+    }
+    return result;
 }
 
 string Tree::printByLevels(const Node *root) const
@@ -578,11 +635,11 @@ void Tree::makeBoss(const string &name, Node *root)
             root->child->siblings = nullptr;
         }
         Node *child = root->child->child;
-            while (child)
-            {
-                child->parent = parent;
-                child = child->siblings;
-            }
+        while (child)
+        {
+            child->parent = parent;
+            child = child->siblings;
+        }
         return;
     }
 
@@ -594,11 +651,10 @@ void Tree::makeBoss(const string &name, Node *root)
         { // if the next child is the needed one
             Node *temp = child->siblings;
             parent = temp->data;                         // Saving the parent
-            child->siblings = child->siblings->siblings; // Making it the parrent
-            root->child = temp;                          // setting the new child
-            // child->siblings = child->siblings->siblings; // Setting the current child to the +1 child
-            temp->siblings = nullptr; //Setting the now parent's siblings to nullptr
-            root->child->child->siblings = child;
+            child->siblings = child->siblings->siblings; // swap
+            root->child = temp;                          // swap
+            temp->siblings = nullptr;                    //Setting the now parent's siblings to nullptr
+            root->child->child->siblings = child;        // swap
 
             break;
         }
@@ -611,7 +667,7 @@ void Tree::makeBoss(const string &name, Node *root)
         child_i->parent = parent;
         child_i = child_i->siblings;
     }
-    if(root->child->child->siblings)
+    if (root->child->child->siblings)
         sortChilds(root->child);
     return;
 }
@@ -629,7 +685,6 @@ void Tree::modernize(int level, Node *root)
     modernize(level, root->siblings);
     if (root->child != nullptr && level % 2 != 0 && root->data != "Uspeshnia")
     {
-        std::cout << root->data << " was removed" << std::endl;
         remove(root->data);
     }
 }
@@ -673,29 +728,81 @@ string Tree::print2(const Node *root) const
     return result;
 }
 
-Tree Tree::join(const Tree* tree) const
+string Tree::join(Tree *tree)
 {
-    Tree result("Uspeshnia");
-    if(!tree->getRoot() || !root)
-        return Tree("");
-    result.join(tree->getRoot(), root, tree, const_cast <Tree*> (this));
-    return result;
+    Tree *result = new Tree(tree);
+    if (!tree->getRoot() || !root)
+        return "";
+    result->join(result->getRoot()->child, root->child, result, this);
+    if (!result)
+        return "";
+    string stringResult = result->toString();
+    delete result;
+    return stringResult;
 }
 
-
 // Join two trees
-Tree Tree::join(const Node* f_root, const Node *s_root, const Tree* f_tree, const Tree* s_tree) const
+void Tree::join(const Node *f_root, const Node *s_root, Tree *f_tree, Tree *s_tree)
 {
-    const Node* current_employee = f_root;
-    if(s_tree->find(current_employee->data)) {
-        int level_f_tree = f_tree->getLevel(current_employee->data);
-        int level_s_tree = s_tree->getLevel(current_employee->data);
-        if(level_f_tree > level_s_tree) {
-            insert(current_employee->data, current_employee->parent);
+    if (!f_root || !s_root || !this->root)
+        return;
+
+    const Node *current_employee = s_root;
+    if (current_employee->data != "Uspeshnia")
+    {
+        if (find(current_employee->data))
+        {
+            string f_parent = f_tree->findParent(current_employee->data);
+
+            Node *subtree = f_tree->findSubtree(current_employee->data, f_tree->root);
+            try
+            {
+                if (find(current_employee->parent, subtree))
+                {
+                    throw std::logic_error("Invalid entry! Parent is a child in the other tree!");
+                }
+            }
+            catch (std::logic_error &e)
+            {
+                this->~Tree();
+                this->root = nullptr;
+                std::cout << e.what() << '\n';
+                return;
+            }
+            if (current_employee->parent != f_parent)
+            {
+
+                int level_s_tree = s_tree->getLevel(current_employee->parent);
+                int level_f_tree = f_tree->getLevel(f_parent);
+                if (level_f_tree > level_s_tree)
+                {
+                    this->insert(current_employee->data + "toRename", current_employee->parent);
+                    this->reasign(current_employee->data, current_employee->data + "toRename");
+                    this->remove(current_employee->data);
+                    this->rename(current_employee->data + "toRename", current_employee->data, this->root);
+                }
+                else if (level_f_tree == level_s_tree)
+                {
+                    if (current_employee->parent < f_parent)
+                    {
+                        this->insert(current_employee->data + "toRename", current_employee->parent);
+                        this->reasign(current_employee->data, current_employee->data + "toRename");
+                        this->remove(current_employee->data);
+                        this->rename(current_employee->data + "toRename", current_employee->data, this->root);
+                    }
+                }
+            }
+        }
+        else
+        {
+            this->insert(current_employee->data, current_employee->parent);
         }
     }
 
-    return Tree("Iskustvo");
+    this->join(f_root, s_root->child, f_tree, s_tree);
+    this->join(f_root, s_root->siblings, f_tree, s_tree);
+
+    return;
 }
 
 string Tree::getParent(const string &name)
@@ -703,7 +810,7 @@ string Tree::getParent(const string &name)
     return findParent(name, root);
 }
 
-Node* Tree::getRoot() const
+Node *Tree::getRoot() const
 {
     return root;
 }

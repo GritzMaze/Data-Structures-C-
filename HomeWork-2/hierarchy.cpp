@@ -55,10 +55,6 @@ Hierarchy::~Hierarchy() noexcept
 
 string Hierarchy::print() const
 {
-    // if(tree->getSize() == 1) {
-    //     return "";
-    // }
-    tree->print2();
     return tree->print();
 }
 
@@ -153,14 +149,14 @@ void Hierarchy::modernize()
     tree->modernize();
 }
 
-// ne e gotovo
 Hierarchy Hierarchy::join(const Hierarchy &right) const
 {
-    //tree.insert("Uspeshnia", "Uspeshnia");
-    //Hierarchy h("Uspeshnia");
-
-    tree->join(right.getTree());
-    return *this;
+    string Tree = tree->join(right.getTree());
+    if (Tree.empty())
+    {
+        return Hierarchy("");
+    }
+    else return Hierarchy(Tree);
 }
 
 int Hierarchy::getLevel(const string &name) const

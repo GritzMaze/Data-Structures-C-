@@ -38,8 +38,8 @@ public:
     int getLevel(const string &name) const;
     Tree *getTree() const;
 private:
-    Tree* tree;
     //Add whatever you need here
+    Tree* tree;
 
     unsigned countWords(const string &str) const;
     unsigned countDel(const string &str, char ch) const;

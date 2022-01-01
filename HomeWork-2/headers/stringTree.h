@@ -44,11 +44,13 @@ private:
     void incorporate(Node*);
     void makeBoss(const string&, Node*);
     void modernize(int , Node*);
-    Tree join(const Node*, const Node*, const Tree*, const Tree*) const;
+    void join(const Node*, const Node*, Tree*,  Tree*);
+    bool rename(const string&, const string&, Node*);
 
 public:
     Tree() : root(nullptr), size(0) {}
     Tree(const Tree &);
+    Tree(const Tree*);
     Tree(Tree &&);
     Tree(const string &);
     ~Tree();
@@ -65,6 +67,7 @@ public:
     int getSize() const;
     int getLevel(const string &) const;
     Node* getRoot() const;
+    Node* getSubtree(const string &);
     string getParent(const string &);
     bool isEmpty() const;
     string findParent(const string&);
@@ -72,9 +75,10 @@ public:
     void incorporate();
     unsigned long getSalary(const string&);
     void modernize();
-    Tree join(const Tree*) const;
+    string join(Tree*);
 
     bool insert(const string &, const string &);
+    string toString() const;
     string print() const;
     string print2() const;
     string print2(const Node*) const;
