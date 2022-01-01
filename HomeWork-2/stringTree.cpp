@@ -342,8 +342,8 @@ bool Tree::reasign(const string &data, const string &name, Node *&subTree, Node 
         if (root->child == nullptr)
         {
             root->child = subTree;
-            removeLink(data, parent);
             subTree->parent = root->data;
+            removeLink(data, parent);
             sortChilds(root);
             return true;
         }
@@ -355,8 +355,8 @@ bool Tree::reasign(const string &data, const string &name, Node *&subTree, Node 
                 child = child->siblings;
             }
             child->siblings = subTree;
-            removeLink(data, parent);
             subTree->parent = root->data;
+            removeLink(data, parent);
             sortChilds(root);
             return true;
         }

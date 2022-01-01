@@ -2,6 +2,27 @@
 
 void Commands::start()
 {
+    std::cout << "Welcome!\n";
+    std::cout << "**************************************************************************************\n";
+    std::cout << "Type 'help' to see the list of commands.\n";
+    std::cout << "Type 'exit' to exit the program.\n";
+    std::cout << "Type 'load <filename> <file or path>' to load a hierarchy from a file.\n";
+    std::cout << "Type 'save <filename> <file or path>' to save a hierarchy to a file.\n";
+    std::cout << "Type 'find <hierarchy> <name>' to find a person in the hierarchy.\n";
+    std::cout << "Type 'subordinates <hierarchy> <name>' to find all subordinates of a person in the hierarchy.\n";
+    std::cout << "Type 'manager <hierarchy> <name>' to find the manager of a person in the hierarchy.\n";
+    std::cout << "Type 'employees <hierarchy>' to find the number of employees in the hierarchy.\n";
+    std::cout << "Type 'overloaded <hierarchy>' to find the number of employees with more than 20 subordinates in the hierarchy.\n";
+    std::cout << "Type 'join <hierarchy1> <hierarchy2> <name of joined hierarchy>' to join two hierarchies.\n";
+    std::cout << "Type 'fire <hierarchy> <name>' to fire a person from the hierarchy.\n";
+    std::cout << "Type 'hire <hierarchy> <name> <manager>' to hire a person to a hierarchy.\n";
+    std::cout << "Type 'salary <hierarchy> <name>' to find the salary of a person in the hierarchy.\n";
+    std::cout << "Type 'incorporate <hierarchy>' to incorporate a hierarchy.\n";
+    std::cout << "Type 'modernize <hierarchy>' to modernize a hierarchy.\n";
+    std::cout << "**************************************************************************************\n";
+    std::cout << "*Note: If you are building with CMake, the default path is 'build/'*\n";
+    std::cout << "**************************************************************************************\n";
+    
     string line;
     while (true)
     {
@@ -123,9 +144,9 @@ void Commands::load(string command)
     command.erase(0, command.find(" ") + 1);
     string filename = command;
 
-    std::ifstream file(filename);
-    std::cout << filename << " " << std::endl;
-    if (file.good())
+    std::ifstream file;
+    file.open(filename);
+    if (file)
     {
 
         std::stringstream buffer;
@@ -376,6 +397,7 @@ void Commands::hire(string command)
             else
             {
                 std::cout << "Hiring was unsuccessful." << std::endl;
+                return;
             }
         }
     }
