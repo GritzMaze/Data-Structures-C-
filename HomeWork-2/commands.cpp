@@ -141,6 +141,7 @@ void Commands::load(string command)
     std::cout << "> ";
 
     string name = command.substr(0, command.find(" "));
+    command += " ";
     command.erase(0, command.find(" ") + 1);
     string filename = command;
 
@@ -159,7 +160,9 @@ void Commands::load(string command)
     }
     else
     {
-        std::cout << "File not found" << std::endl;
+        if(!filename.empty()) {
+            std::cout << "File not found!" << std::endl;
+        }
         std::cout << "Enter hierarchy manually (i.e. Uspeshnia-Gosho):" << std::endl;
         string result;
         std::cout << "> ";
@@ -181,8 +184,10 @@ void Commands::save(string command)
 {
 
     string name = command.substr(0, command.find(" "));
+    command += " ";
     command.erase(0, command.find(" ") + 1);
     string filename = command;
+
     if (filename.empty())
     {
         for (int i = 0; i < hierarchies.size(); i++)
