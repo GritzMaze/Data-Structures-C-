@@ -169,7 +169,10 @@ void Commands::load(string command)
     command += " ";
     command.erase(0, command.find(" ") + 1);
     string filename = command;
-
+    if(name == " " || name.empty() || name == "load") {
+        std::cout << "Please enter a valid name." << std::endl;
+        return;
+    }
     std::ifstream file;
     file.open(filename);
     if (file)
@@ -214,6 +217,11 @@ void Commands::save(string command)
     command += " ";
     command.erase(0, command.find(" ") + 1);
     string filename = command;
+
+    if(name == " " || name.empty() || name == "save") {
+        std::cout << "Please enter a valid name." << std::endl;
+        return;
+    }
 
     if (filename.empty())
     {
