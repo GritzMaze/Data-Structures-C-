@@ -1,4 +1,4 @@
-#include "headers/stringTree.h"
+#include "../headers/stringTree.h"
 
 Tree::Tree(const Tree &other)
 {
@@ -689,45 +689,6 @@ void Tree::modernize(int level, Node *root)
     }
 }
 
-string Tree::print2() const
-{
-    return print2(root);
-}
-
-string Tree::print2(const Node *root) const
-{
-    string result = "";
-    if (!root)
-        return result;
-    std::queue<const Node *> front;
-    front.push(root);
-    front.push(nullptr);
-    for (;;)
-    {
-        const Node *current = front.front();
-        front.pop();
-        if (!current)
-        {
-            std::cout << '\n';
-            result.push_back('\n');
-            if (front.empty())
-                return result;
-            front.push(nullptr);
-        }
-        else
-        {
-            result.append(current->data);
-            result.append(" ");
-            std::cout << current->data << ' ';
-            for (const Node *it = current->child; it; it = it->siblings)
-            {
-                front.push(it);
-            }
-        }
-    }
-    return result;
-}
-
 string Tree::join(Tree *tree)
 {
     Tree *result = new Tree(tree);
@@ -757,7 +718,7 @@ void Tree::join(const Node *f_root, const Node *s_root, Tree *f_tree, Tree *s_tr
             Node *subtree = f_tree->findSubtree(current_employee->data, f_tree->root);
             try
             {
-                if (find(current_employee->parent, subtree))
+                if (find(current_employee->parent, subtree->child))
                 {
                     throw std::logic_error("Invalid entry! Parent is a child in the other tree!");
                 }

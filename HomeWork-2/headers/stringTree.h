@@ -28,29 +28,29 @@ private:
     bool find(const string &, Node *) const;
     Node *findSubtree(const string &, Node *);
     bool remove(const string &, Node *&);
-    bool removeLink(const string&, Node*&);
+    bool removeLink(const string &, Node *&);
 
     int height(const Node *) const;
     int findAllChilds(const Node *);
     int findAllDirectChilds(const Node *);
-    int findMoreThanNthChilds(const int&, const Node*);
+    int findMoreThanNthChilds(const int &, const Node *);
     string findParent(const string &, Node *);
-    bool reasign(const string&, const string&, Node*&, Node*&);
+    bool reasign(const string &, const string &, Node *&, Node *&);
     bool insert(const string &, const string &, Node *&);
     string printByLevels(const Node *) const;
     string printAllOnLevel(const int &, string, const Node *) const;
-    int getLevel(const string&, Node*) const;
-    void sortChilds(Node*);
-    void incorporate(Node*);
-    void makeBoss(const string&, Node*);
-    void modernize(int , Node*);
-    void join(const Node*, const Node*, Tree*,  Tree*);
-    bool rename(const string&, const string&, Node*);
+    int getLevel(const string &, Node *) const;
+    void sortChilds(Node *);
+    void incorporate(Node *);
+    void makeBoss(const string &, Node *);
+    void modernize(int, Node *);
+    void join(const Node *, const Node *, Tree *, Tree *);
+    bool rename(const string &, const string &, Node *);
 
 public:
     Tree() : root(nullptr), size(0) {}
     Tree(const Tree &);
-    Tree(const Tree*);
+    Tree(const Tree *);
     Tree(Tree &&);
     Tree(const string &);
     ~Tree();
@@ -62,24 +62,22 @@ public:
 
     int findAllChilds(const string &);
     int findAllDirectChilds(const string &);
-    int findMoreThanNthChilds(const int&);
+    int findMoreThanNthChilds(const int &);
     int getHeight() const;
     int getSize() const;
     int getLevel(const string &) const;
-    Node* getRoot() const;
-    Node* getSubtree(const string &);
+    Node *getRoot() const;
+    Node *getSubtree(const string &);
     string getParent(const string &);
     bool isEmpty() const;
-    string findParent(const string&);
-    bool reasign(const string&, const string&);
+    string findParent(const string &);
+    bool reasign(const string &, const string &);
     void incorporate();
-    unsigned long getSalary(const string&);
+    unsigned long getSalary(const string &);
     void modernize();
-    string join(Tree*);
+    string join(Tree *);
 
     bool insert(const string &, const string &);
     string toString() const;
     string print() const;
-    string print2() const;
-    string print2(const Node*) const;
 };

@@ -1,4 +1,4 @@
-#include "commands.h"
+#include "../headers/commands.h"
 
 void Commands::start()
 {
@@ -22,7 +22,7 @@ void Commands::start()
     std::cout << "**************************************************************************************\n";
     std::cout << "*Note: If you are building with CMake, the default path is 'build/'*\n";
     std::cout << "**************************************************************************************\n";
-    
+
     string line;
     while (true)
     {
@@ -113,26 +113,51 @@ void Commands::start()
 
 void Commands::help()
 {
-    std::cout << "Available commands:" << std::endl;
-    std::cout << "load <hierarchy> <filename>" << std::endl;
-    std::cout << "save <hierarchy> <filename>" << std::endl;
-    std::cout << "find <hierarchy> <name>" << std::endl;
-    std::cout << "num_subordinates <hierarchy> <name>" << std::endl;
-    std::cout << "manager <hierarchy> <name>" << std::endl;
-    std::cout << "num_employees <hierarchy>" << std::endl;
-    std::cout << "overloaded <hierarchy>" << std::endl;
-    std::cout << "join <hierarchy1> <hierarchy2> <result hierarchy>" << std::endl;
-    std::cout << "fire <hierarchy> <name>" << std::endl;
-    std::cout << "hire <hierarchy> <name> <boss>" << std::endl;
-    std::cout << "salary <hierarchy> <name>" << std::endl;
-    std::cout << "incorporate <hierarchy>" << std::endl;
-    std::cout << "modernize <hierarchy>" << std::endl;
-    std::cout << "exit" << std::endl;
+    std::cout << "Welcome!\n";
+    std::cout << "**************************************************************************************\n";
+    std::cout << "Type 'help' to see the list of commands.\n";
+    std::cout << "Type 'exit' to exit the program.\n";
+    std::cout << "Type 'load <filename> <file or path>' to load a hierarchy from a file.\n";
+    std::cout << "Type 'save <filename> <file or path>' to save a hierarchy to a file.\n";
+    std::cout << "Type 'find <hierarchy> <name>' to find a person in the hierarchy.\n";
+    std::cout << "Type 'subordinates <hierarchy> <name>' to find all subordinates of a person in the hierarchy.\n";
+    std::cout << "Type 'manager <hierarchy> <name>' to find the manager of a person in the hierarchy.\n";
+    std::cout << "Type 'employees <hierarchy>' to find the number of employees in the hierarchy.\n";
+    std::cout << "Type 'overloaded <hierarchy>' to find the number of employees with more than 20 subordinates in the hierarchy.\n";
+    std::cout << "Type 'join <hierarchy1> <hierarchy2> <name of joined hierarchy>' to join two hierarchies.\n";
+    std::cout << "Type 'fire <hierarchy> <name>' to fire a person from the hierarchy.\n";
+    std::cout << "Type 'hire <hierarchy> <name> <manager>' to hire a person to a hierarchy.\n";
+    std::cout << "Type 'salary <hierarchy> <name>' to find the salary of a person in the hierarchy.\n";
+    std::cout << "Type 'incorporate <hierarchy>' to incorporate a hierarchy.\n";
+    std::cout << "Type 'modernize <hierarchy>' to modernize a hierarchy.\n";
+    std::cout << "**************************************************************************************\n";
+    std::cout << "*Note: If you are building with CMake, the default path is 'build/'*\n";
+    std::cout << "**************************************************************************************\n";
 }
 
 void Commands::quit()
 {
-    std::cout << "Bye!" << std::endl;
+    for (int i = 0; i < hierarchies.size(); i++)
+    {
+        if (hierarchies[i].isModified())
+        {
+            std::cout << hierarchies[i].getName() << " was modified. Do you want to save it? (y/n)" << std::endl;
+            string line;
+            std::cout << "> ";
+            getline(std::cin, line);
+            transform(line.begin(), line.end(), line.begin(), ::tolower);
+            if (line == "y")
+            {
+                string command = hierarchies[i].getName() + " ";
+                std::cout << "Enter filename: ";
+                getline(std::cin, line);
+                command += line;
+                save(command);
+            }
+        }
+    }
+
+    std::cout << "Thank you! Bye!" << std::endl;
     exit(0);
 }
 
@@ -160,7 +185,8 @@ void Commands::load(string command)
     }
     else
     {
-        if(!filename.empty()) {
+        if (!filename.empty())
+        {
             std::cout << "File not found!" << std::endl;
         }
         std::cout << "Enter hierarchy manually (i.e. Uspeshnia-Gosho):" << std::endl;
@@ -175,6 +201,7 @@ void Commands::load(string command)
 
         Hierarchy h(result);
         h.setName(name);
+        h.setModified(true);
         hierarchies.push_back(h);
         std::cout << h.getName() << " loaded successfully!" << std::endl;
     }
@@ -211,6 +238,7 @@ void Commands::save(string command)
         {
             file << hierarchies[i].getString();
             std::cout << "Saved to " << filename << std::endl;
+            hierarchies[i].setModified(false);
         }
     }
     file.close();
@@ -221,9 +249,8 @@ void Commands::find(string command)
     string hierarchy = command.substr(0, command.find(" "));
     command.erase(0, command.find(" ") + 1);
     string name = command;
-    std::cout << hierarchies.size() << std::endl;
-         hierarchies[0].print();
-        std::cout << hierarchies[0].getName() << std::endl;
+
+    std::cout << hierarchies[0].getName() << std::endl;
     for (int i = 0; i < hierarchies.size(); i++)
     {
         if (hierarchies[i].getName() == hierarchy)
@@ -335,7 +362,6 @@ void Commands::join(string command)
 
     for (int i = 0; i < hierarchies.size(); i++)
     {
-        std::cout << hierarchies[i].getName() << std::endl;
         if (hierarchies[i].getName() == hierarchy1)
         {
             for (int j = 0; j < hierarchies.size(); j++)
@@ -344,6 +370,7 @@ void Commands::join(string command)
                 {
                     Hierarchy h = hierarchies[i].join(hierarchies[j]);
                     h.setName(resultHierarchy);
+                    h.setModified(true);
                     hierarchies.push_back(h);
                     std::cout << resultHierarchy << " created." << std::endl;
                     return;
@@ -370,6 +397,7 @@ void Commands::fire(string command)
             {
                 hierarchies[i].fire(name);
                 std::cout << name << " was fired from " << hierarchy << "." << std::endl;
+                hierarchies[i].setModified(true);
                 return;
             }
             else
@@ -397,6 +425,7 @@ void Commands::hire(string command)
             if (hierarchies[i].hire(name, manager))
             {
                 std::cout << name << " was hired in " << hierarchy << " with manager " << manager << "." << std::endl;
+                hierarchies[i].setModified(true);
                 return;
             }
             else
@@ -444,6 +473,7 @@ void Commands::incorporate(string command)
         {
             hierarchies[i].incorporate();
             std::cout << hierarchy << " incorporated." << std::endl;
+            hierarchies[i].setModified(true);
             return;
         }
     }
@@ -460,6 +490,7 @@ void Commands::modernize(string command)
         {
             hierarchies[i].modernize();
             std::cout << hierarchy << " modernized." << std::endl;
+            hierarchies[i].setModified(true);
             return;
         }
     }

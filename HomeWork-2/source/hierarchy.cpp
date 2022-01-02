@@ -1,9 +1,10 @@
-#include "interface.h"
+#include "../headers/interface.h"
 
 Hierarchy::Hierarchy(Hierarchy &&r) noexcept
 {
     tree = r.tree;
     name = r.name;
+    modified = r.modified;
     r.tree = nullptr;
 }
 
@@ -11,6 +12,7 @@ Hierarchy::Hierarchy(const Hierarchy &r)
 {
     tree = new Tree(*r.tree);
     this->name = r.name;
+    this->modified = r.modified;
 }
 
 Hierarchy::Hierarchy(const string &data)
@@ -37,6 +39,22 @@ Hierarchy::Hierarchy(const string &data)
                                   { return std::isspace(x); }),
                    line.end());
         std::replace(line.begin(), line.end(), '-', ' ');
+        for (char c : line)
+        {
+            bool isValid = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == ' ';
+            try
+            {
+                if (!isValid)
+                    throw std::invalid_argument("Invalid input! Empty tree created!");
+            }
+            catch (std::invalid_argument &e)
+            {
+                std::cout << e.what() << std::endl;
+                delete tree;
+                tree = new Tree("");
+                return;
+            }
+        }
         std::stringstream line_s(line);
         string name;
         string boss;
@@ -74,7 +92,7 @@ string Hierarchy::getName() const
     return this->name;
 }
 
-void Hierarchy::setName(const string& name)
+void Hierarchy::setName(const string &name)
 {
     this->name = name;
 }
@@ -170,7 +188,6 @@ void Hierarchy::incorporate()
     return tree->incorporate();
 }
 
-
 void Hierarchy::modernize()
 {
     tree->modernize();
@@ -183,7 +200,8 @@ Hierarchy Hierarchy::join(const Hierarchy &right) const
     {
         return Hierarchy("");
     }
-    else return Hierarchy(Tree);
+    else
+        return Hierarchy(Tree);
 }
 
 int Hierarchy::getLevel(const string &name) const

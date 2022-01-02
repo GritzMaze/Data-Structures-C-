@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-#include "interface.h"
+#include "../headers/interface.h"
 
 const string TheBoss = "Uspeshnia";
 

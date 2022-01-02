@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include "interface.h"
+#include "./interface.h"
 #include <string>
 #include <vector>
 #include <fstream>

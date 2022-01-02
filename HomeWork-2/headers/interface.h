@@ -2,7 +2,7 @@
 #include <string.h>
 #include <sstream>
 #include <algorithm>
-#include "headers/stringTree.h"
+#include "./stringTree.h"
 
 using std::string;
 

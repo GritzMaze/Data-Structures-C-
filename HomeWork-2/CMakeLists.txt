@@ -7,21 +7,24 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(CTest)
 enable_testing()
 
-add_executable(tests tests.cpp
-                interface.h
-                catch.hpp 
-                hierarchy.cpp
-                stringTree.cpp           
+add_executable(tests ./common/tests.cpp
+                    ./headers/interface.h
+                    ./common/catch.hpp
+                    ./source/hierarchy.cpp
+                    ./headers/stringTree.h
+                    ./source/stringTree.cpp
+                    ./source/commands.cpp
+                    ./headers/commands.h          
     )
 
 add_executable(main ./main.cpp
-                    ./interface.h
-                    ./catch.hpp
-                    ./hierarchy.cpp
-                    headers/stringTree.h
-                    ./stringTree.cpp
-                    ./commands.cpp
-                    ./commands.h)
+                    ./headers/interface.h
+                    ./common/catch.hpp
+                    ./source/hierarchy.cpp
+                    ./headers/stringTree.h
+                    ./source/stringTree.cpp
+                    ./source/commands.cpp
+                    ./headers/commands.h)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
