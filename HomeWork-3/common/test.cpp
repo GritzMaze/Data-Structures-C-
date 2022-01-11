@@ -171,3 +171,41 @@ TEST_CASE("Comparator works correctly for the streams [one two three] and []")
 		REQUIRE(report.uniqueWords[0].words() == expected);
 	}
 }
+
+
+// new tests
+
+TEST_CASE("Comparator works corectly with escape characters")
+{
+	std::stringstream a("one \n  \n \t \t two three");
+	std::stringstream b("two\t \tone\t four\n one\n \n \t  \n one");
+
+	Comparator c;
+	ComparisonReport report = c.compare(a, b);
+
+	SECTION("Sizes are reported correctly")
+	{
+		REQUIRE(report.commonWords.countOfUniqueWords() == 2);
+		REQUIRE(report.uniqueWords[0].countOfUniqueWords() == 1);
+		REQUIRE(report.uniqueWords[1].countOfUniqueWords() == 2);
+	}
+
+	SECTION("The common words are {one,two}")
+	{
+		std::multiset<std::string> expected{ "one","two" };
+		REQUIRE(report.commonWords.words() == expected);
+	}
+
+	SECTION("The first stream has unique words {three}")
+	{
+		std::multiset<std::string> expected{ "three" };
+		REQUIRE(report.uniqueWords[0].words() == expected);
+	}
+
+	SECTION("The second stream has unique words {four,one}")
+	{
+		std::multiset<std::string> expected{ "four","one" };
+		REQUIRE(report.uniqueWords[1].words() == expected);
+	}
+
+}

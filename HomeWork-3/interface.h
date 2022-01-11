@@ -35,6 +35,9 @@ public:
 	// You can add additional members if you need to
 
 	void removeOne(const std::string &word);
+	// void compareInPercentage(const ComparisonReport &report, const WordsMultiset& file1, const WordsMultiset& file2);
+	void print() const;
+
 private:
 	HashMap<std::string, int> hash;
 };
@@ -66,6 +69,13 @@ public:
 	ComparisonReport compare(std::istream &a, std::istream &b);
 
 	// You can add additional members if you need to
+	void compareInPercentage(const ComparisonReport &report);
+
+private:
+	int file1_words;
+	int file2_words;
+	int file1_unique_words;
+	int file2_unique_words;
 };
 
 void WordsMultiset::add(const std::string &word, size_t times)
@@ -95,14 +105,13 @@ size_t WordsMultiset::countOfUniqueWords() const
 	return hash.size();
 }
 
-
 std::multiset<std::string> WordsMultiset::words() const
 {
 	return hash.keys();
 }
 
-
-void WordsMultiset::removeOne(const std::string& word) {
+void WordsMultiset::removeOne(const std::string &word)
+{
 	if (this->contains(word))
 	{
 		this->hash[word]--;
@@ -113,13 +122,13 @@ void WordsMultiset::removeOne(const std::string& word) {
 	}
 }
 
-
 ComparisonReport Comparator::compare(std::istream &a, std::istream &b)
 {
 	ComparisonReport report;
 	std::string word;
 	WordsMultiset a_set;
 	WordsMultiset b_set;
+
 	while (a >> word)
 	{
 		a_set.add(word);
@@ -128,6 +137,9 @@ ComparisonReport Comparator::compare(std::istream &a, std::istream &b)
 	{
 		b_set.add(word);
 	}
+
+	this->file1_words = a_set.words().size();
+	this->file2_words = b_set.words().size();
 
 	for (std::string word : a_set.words())
 	{
@@ -139,14 +151,49 @@ ComparisonReport Comparator::compare(std::istream &a, std::istream &b)
 		}
 		else
 		{
-			report.uniqueWords[0].add(word);
+			if (!report.uniqueWords[0].contains(word))
+			{
+				report.uniqueWords[0].add(word);
+			}
 		}
 	}
 
-	for(std::string word : b_set.words())
+	for (std::string word : b_set.words())
 	{
-		report.uniqueWords[1].add(word);
+		if (!report.uniqueWords[1].contains(word))
+		{
+			report.uniqueWords[1].add(word);
+		}
 	}
 
+	this->file1_unique_words = report.uniqueWords[0].words().size();
+	this->file2_unique_words = report.uniqueWords[1].words().size();
+
 	return report;
+}
+
+void WordsMultiset::print() const
+{
+	for (std::string word : this->words())
+	{
+		std::cout << word << " ";
+	}
+}
+
+void Comparator::compareInPercentage(const ComparisonReport &report)
+{
+
+	int percentageF1 = (this->file1_words - this->file1_unique_words) * 100 / this->file1_words;
+	int percentageF2 = (this->file2_words - this->file2_unique_words) * 100 / this->file2_words;
+
+
+// fix be mama ti
+	std::cout << "file1 contains " << this->file1_words << " words and "
+			  << this->file1_words - this->file1_unique_words << " are also in file2 (" << percentageF1 << "%)"
+			  << std::endl;
+
+	std::cout << "file2 contains " << this->file2_words << " words and "
+			  << this->file2_words - this->file2_unique_words << " are also in file1 (" << percentageF2 << "%)"
+			  << std::endl;
+	return;
 }
