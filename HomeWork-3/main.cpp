@@ -13,7 +13,9 @@ int main(int, char**) {
     hash[ "six"   ] = 6;
     hash[ "seven" ] = 7;
     hash[ "eight" ] = 8;
+    hash.print();
 
+    std::cout << std::endl;
     // hash.insert("one", 1);
     // hash.insert("two", 2);
     // hash.insert("three", 3);
@@ -22,7 +24,9 @@ int main(int, char**) {
     // hash.insert("six", 6);
     // hash.insert("seven", 7);
     // hash.insert("eight", 8);
+    hash.remove("five");
 
 
     hash.print();
+    std::cout << hash.size();
 }

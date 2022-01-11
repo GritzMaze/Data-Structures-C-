@@ -1,6 +1,7 @@
 #include <iostream>
 #include <set>
 #include <string>
+#include "hashMap.h"
 
 ///
 /// Represents a multiset of words
@@ -9,28 +10,33 @@
 /// check out the corresponding unit tests
 ///
 /// Implement all methods of this class
-/// 
-class WordsMultiset {
+///
+class WordsMultiset
+{
 public:
 	/// Adds times occurences of word to the container
 	///
 	/// For example, add("abc") adds the word "abc" once,
 	/// while add("abc", 4) adds 4 occurrances.
-	void add(const std::string& word, size_t times = 1);
+	void add(const std::string &word, size_t times = 1);
 
 	/// Checks whether word is contained in the container
-	bool contains(const std::string& word) const;
+	bool contains(const std::string &word) const;
 
-	/// Number of occurrances of word 
-	size_t countOf(const std::string& word) const;
+	/// Number of occurrances of word
+	size_t countOf(const std::string &word) const;
 
 	/// Number of unique words in the container
 	size_t countOfUniqueWords() const;
 
 	/// Returns a multiset of all words in the container
 	std::multiset<std::string> words() const;
-	
+
 	// You can add additional members if you need to
+
+	void removeOne(const std::string &word);
+private:
+	HashMap<std::string, int> hash;
 };
 
 ///
@@ -39,7 +45,8 @@ public:
 /// If you need to see how it is intended to be used,
 /// check out the corresponding unit tests
 ///
-class ComparisonReport {
+class ComparisonReport
+{
 public:
 	/// A multiset of all words that exist in both streams
 	WordsMultiset commonWords;
@@ -50,12 +57,96 @@ public:
 	WordsMultiset uniqueWords[2];
 };
 
-/// 
+///
 /// Can be used to compare two streams of words
 ///
-class Comparator {
+class Comparator
+{
 public:
-	ComparisonReport compare(std::istream& a, std::istream& b);
+	ComparisonReport compare(std::istream &a, std::istream &b);
 
 	// You can add additional members if you need to
 };
+
+void WordsMultiset::add(const std::string &word, size_t times)
+{
+	if (this->contains(word))
+	{
+		this->hash[word] += times;
+	}
+	else
+	{
+		this->hash[word] = times;
+	}
+}
+
+bool WordsMultiset::contains(const std::string &word) const
+{
+	return this->hash.contains(word);
+}
+
+size_t WordsMultiset::countOf(const std::string &word) const
+{
+	return hash.countOf(word);
+}
+
+size_t WordsMultiset::countOfUniqueWords() const
+{
+	return hash.size();
+}
+
+
+std::multiset<std::string> WordsMultiset::words() const
+{
+	return hash.keys();
+}
+
+
+void WordsMultiset::removeOne(const std::string& word) {
+	if (this->contains(word))
+	{
+		this->hash[word]--;
+		if (this->hash[word] == 0)
+		{
+			this->hash.remove(word);
+		}
+	}
+}
+
+
+ComparisonReport Comparator::compare(std::istream &a, std::istream &b)
+{
+	ComparisonReport report;
+	std::string word;
+	WordsMultiset a_set;
+	WordsMultiset b_set;
+	while (a >> word)
+	{
+		a_set.add(word);
+	}
+	while (b >> word)
+	{
+		b_set.add(word);
+	}
+
+	for (std::string word : a_set.words())
+	{
+		if (b_set.contains(word))
+		{
+			a_set.removeOne(word);
+			b_set.removeOne(word);
+			report.commonWords.add(word);
+		}
+		else
+		{
+			report.uniqueWords[0].add(word);
+		}
+	}
+
+	for(std::string word : b_set.words())
+	{
+		report.uniqueWords[1].add(word);
+	}
+
+	return report;
+}
