@@ -74,8 +74,7 @@ public:
 private:
 	int file1_words;
 	int file2_words;
-	int file1_unique_words;
-	int file2_unique_words;
+	int common_words;
 };
 
 void WordsMultiset::add(const std::string &word, size_t times)
@@ -166,8 +165,7 @@ ComparisonReport Comparator::compare(std::istream &a, std::istream &b)
 		}
 	}
 
-	this->file1_unique_words = report.uniqueWords[0].words().size();
-	this->file2_unique_words = report.uniqueWords[1].words().size();
+	this->common_words = report.commonWords.words().size();
 
 	return report;
 }
@@ -183,17 +181,16 @@ void WordsMultiset::print() const
 void Comparator::compareInPercentage(const ComparisonReport &report)
 {
 
-	int percentageF1 = (this->file1_words - this->file1_unique_words) * 100 / this->file1_words;
-	int percentageF2 = (this->file2_words - this->file2_unique_words) * 100 / this->file2_words;
+	int percentageF1 = (this->common_words) * 100 / this->file1_words;
+	int percentageF2 = (this->common_words) * 100 / this->file2_words;
 
 
-// fix be mama ti
 	std::cout << "file1 contains " << this->file1_words << " words and "
-			  << this->file1_words - this->file1_unique_words << " are also in file2 (" << percentageF1 << "%)"
+			  << this->common_words << " are also in file2 (" << percentageF1 << "%)"
 			  << std::endl;
 
 	std::cout << "file2 contains " << this->file2_words << " words and "
-			  << this->file2_words - this->file2_unique_words << " are also in file1 (" << percentageF2 << "%)"
+			  << this->common_words << " are also in file1 (" << percentageF2 << "%)"
 			  << std::endl;
 	return;
 }
