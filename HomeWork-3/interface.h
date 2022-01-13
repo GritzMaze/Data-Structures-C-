@@ -72,9 +72,9 @@ public:
 	void compareInPercentage(const ComparisonReport &report);
 
 private:
-	int file1_words;
-	int file2_words;
-	int common_words;
+	int file1_words = 0;
+	int file2_words = 0;
+	int common_words = 0;
 };
 
 void WordsMultiset::add(const std::string &word, size_t times)
@@ -131,14 +131,15 @@ ComparisonReport Comparator::compare(std::istream &a, std::istream &b)
 	while (a >> word)
 	{
 		a_set.add(word);
+		this->file1_words++;
 	}
+
 	while (b >> word)
 	{
 		b_set.add(word);
+		this->file2_words++;
 	}
 
-	this->file1_words = a_set.words().size();
-	this->file2_words = b_set.words().size();
 
 	for (std::string word : a_set.words())
 	{
@@ -147,6 +148,7 @@ ComparisonReport Comparator::compare(std::istream &a, std::istream &b)
 			a_set.removeOne(word);
 			b_set.removeOne(word);
 			report.commonWords.add(word);
+			this->common_words++;
 		}
 		else
 		{
@@ -164,8 +166,6 @@ ComparisonReport Comparator::compare(std::istream &a, std::istream &b)
 			report.uniqueWords[1].add(word);
 		}
 	}
-
-	this->common_words = report.commonWords.words().size();
 
 	return report;
 }

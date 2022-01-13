@@ -44,7 +44,7 @@ public:
     }
 };
 
-template <class Key, class Value, class Hash = std::hash<Key>>
+template <class Key, class Value, class Hash = std::hash<Key> >
 class HashMap
 {
     public:
@@ -298,24 +298,6 @@ size_t HashMap<Key, Value, Hash>::hash(Key key) const
 {
     return this->hash_(key) % this->capacity_;
 }
-
-// template <class Key, class Value, class Hash>
-// HashMap<Key, Value, Hash>::HashMap(const HashMap<Key, Value, Hash>& other) {
-//     this->size_ = other.size_;
-//     this->capacity_ = other.capacity_;
-//     this->table = new HashNode<Key, Value>*[this->capacity_];
-//     for (size_t i = 0; i < this->capacity_; i++) {
-//         this->table[i] = nullptr;
-//     }
-
-//     for (size_t i = 0; i < this->capacity_; i++) {
-//         HashNode<Key, Value>* node = other.table[i];
-//         while (node != nullptr) {
-//             this->insert(node->getKey(), node->getValue());
-//             node = node->getNext();
-//         }
-//     }
-// }
 
 template <class Key, class Value, class Hash>
 void HashMap<Key, Value, Hash>::print() const

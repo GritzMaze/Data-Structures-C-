@@ -9,16 +9,11 @@ int main(int argc, char **argv)
 {
   
 
-    // if (argc != 3)
-    //     throw std::invalid_argument("More or less than 2 arguments");
+    if (argc != 3)
+        throw std::invalid_argument("More or less than 2 arguments");
 
-    // std::string file1 = argv[1];
-    // std::string file2 = argv[2];
-    std::string file1 = "C:\\Users\\Sprint\\github\\Data-Structures-C++\\HomeWork-3\\big_data1.txt";
-    std::string file2 = "C:\\Users\\Sprint\\github\\Data-Structures-C++\\HomeWork-3\\big_data2.txt";
-
-    // start timer
-    auto start = std::chrono::high_resolution_clock::now();
+    std::string file1 = argv[1];
+    std::string file2 = argv[2];
 
     std::stringstream file1_stream;
     std::stringstream file2_stream;
@@ -58,10 +53,6 @@ int main(int argc, char **argv)
     Comparator c;
     ComparisonReport report = c.compare(file1_stream, file2_stream);
     c.compareInPercentage(report);
-    // end timer
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> diff = end - start;
-    // print timer
-    std::cout << "Time: " << diff.count() << " s" << std::endl;
+
     return 0;
 }
