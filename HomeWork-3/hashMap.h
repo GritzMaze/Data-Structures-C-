@@ -3,6 +3,8 @@
 #include <iostream>
 #include <set>
 
+const int DEFAULT_TABLE_SIZE = 128;
+
 template <class Key, class Value>
 class HashNode
 {
@@ -48,7 +50,7 @@ template <class Key, class Value, class Hash = std::hash<Key> >
 class HashMap
 {
     public:
-                                HashMap(size_t size = 10);
+                                HashMap(size_t size = DEFAULT_TABLE_SIZE);
                                 ~HashMap();
         HashNode<Key, Value>*    insert(Key key, Value value);
         Value&                  operator[](Key key);
@@ -56,6 +58,7 @@ class HashMap
         bool                    contains(Key key)               const;
         size_t                  countOf(Key key)                const;
         std::multiset<Key>      keys()                          const;
+        std::multiset<Key>      uniqueKeys()                    const;
         std::multiset<Value>    values()                        const;
         size_t                  size()                          const;
         size_t                  capacity()                      const;
@@ -69,11 +72,13 @@ class HashMap
         size_t                  size_;
         size_t                  capacity_;
         Hash                    hash_;
+        size_t                  maxSize;
 
         void                    resizeTable(size_t newSize);
         size_t                  hash(Key key)                   const;
         size_t                  getIndex(Key key)               const;
         void                    printTable()                    const;
+        HashNode<Key, Value>*   find(Key key)                   const;
 };
 
 template <class Key, class Value, class Hash>
@@ -81,6 +86,7 @@ HashMap<Key, Value, Hash>::HashMap(size_t size)
 {
     this->size_ = 0;
     this->capacity_ = size;
+    this->maxSize = 96;
     this->table = new HashNode<Key, Value> *[size];
     for (size_t i = 0; i < size; i++)
     {
@@ -98,6 +104,12 @@ HashMap<Key, Value, Hash>::~HashMap()
 template <class Key, class Value, class Hash>
 HashNode<Key, Value> *HashMap<Key, Value, Hash>::insert(Key key, Value value)
 {
+
+    if (this->size_ >= this->maxSize)
+    {
+        this->resizeTable(this->capacity_ * 2);
+    }
+
     unsigned long hashValue = this->hash(key);
     HashNode<Key, Value> *prev = nullptr;
     HashNode<Key, Value> *curr = this->table[hashValue];
@@ -124,11 +136,6 @@ HashNode<Key, Value> *HashMap<Key, Value, Hash>::insert(Key key, Value value)
     else
     {
         curr->setValue(value);
-    }
-
-    if (this->size_ > this->capacity_)
-    {
-        this->resizeTable(this->capacity_ * 2);
     }
     return curr;
 }
@@ -165,9 +172,9 @@ void HashMap<Key, Value, Hash>::remove(Key key)
 template <class Key, class Value, class Hash>
 Value &HashMap<Key, Value, Hash>::operator[](Key key)
 {
-    if (this->contains(key))
+    if (HashNode<Key, Value>* data = this->find(key))
     {
-        return this->table[this->hash(key)]->getValue();
+        return data->getValue();
     }
     else
     {
@@ -178,24 +185,22 @@ Value &HashMap<Key, Value, Hash>::operator[](Key key)
 template <class Key, class Value, class Hash>
 bool HashMap<Key, Value, Hash>::contains(Key key) const
 {
-    unsigned long hashValue = this->hash(key);
-    HashNode<Key, Value> *curr = this->table[hashValue];
-
-    while (curr != nullptr && curr->getKey() != key)
+    if(this->find(key))
     {
-        curr = curr->getNext();
+        return true;
     }
-
-    return curr != nullptr;
+    else
+    {
+        return false;
+    }
 }
-
 
 template <class Key, class Value, class Hash>
 size_t HashMap<Key, Value, Hash>::countOf(Key key) const
 {
-    if (this->contains(key))
+    if (HashNode<Key, Value>* data = this->find(key))
     {
-        return this->table[this->hash(key)]->getValue();
+        return data->getValue();
     }
     else
     {
@@ -212,10 +217,28 @@ std::multiset<Key> HashMap<Key, Value, Hash>::keys() const
         HashNode<Key, Value> *node = this->table[i];
         while (node != nullptr)
         {
-            for(int i = 0; i < this->countOf(node->getKey()); i++)
+            Key key = node->getKey();
+            int count = node->getValue();
+            for(int i = 0; i < count; i++)
             {
-                keys.insert(node->getKey());
+                keys.insert(key);
             }
+            node = node->getNext();
+        }
+    }
+    return keys;
+}
+
+template <class Key, class Value, class Hash>
+std::multiset<Key> HashMap<Key, Value, Hash>::uniqueKeys() const
+{
+    std::multiset<Key> keys;
+    for (size_t i = 0; i < this->capacity_; i++)
+    {
+        HashNode<Key, Value> *node = this->table[i];
+        while (node != nullptr)
+        {
+            keys.insert(node->getKey());
             node = node->getNext();
         }
     }
@@ -269,28 +292,34 @@ void HashMap<Key, Value, Hash>::clear()
 template <class Key, class Value, class Hash>
 void HashMap<Key, Value, Hash>::resizeTable(size_t newSize)
 {
-    HashNode<Key, Value> **newTable = new HashNode<Key, Value> *[newSize];
+    int oldTableSize = this->capacity_;
+    this->capacity_ = newSize;
+    this->maxSize = (int) (this->capacity_ * 0.75f);
+    HashNode<Key, Value> **oldTable = this->table;
+    this->table = new HashNode<Key, Value>* [newSize];
     for (size_t i = 0; i < newSize; i++)
     {
-        newTable[i] = nullptr;
+        table[i] = nullptr;
     }
 
-    for (size_t i = 0; i < this->capacity_; i++)
+    this->size_ = 0;
+
+    for (size_t i = 0; i < oldTableSize; i++)
     {
-        HashNode<Key, Value> *node = this->table[i];
-        while (node != nullptr)
-        {
-            unsigned long hashValue = this->hash(node->getKey());
-            HashNode<Key, Value> *next = node->getNext();
-            node->setNext(newTable[hashValue]);
-            newTable[hashValue] = node;
-            node = next;
+        if(oldTable[i] != nullptr) {
+            HashNode<Key, Value>* oldEntry;
+            HashNode<Key, Value>* newEntry = oldTable[i];
+            while(newEntry != nullptr)
+            {
+                this->insert(newEntry->getKey(), newEntry->getValue());
+                oldEntry = newEntry;
+                newEntry = newEntry->getNext();
+                delete oldEntry;
+            }
         }
     }
 
-    delete[] this->table;
-    this->table = newTable;
-    this->capacity_ = newSize;
+    delete[] oldTable;
 }
 
 template <class Key, class Value, class Hash>
@@ -311,4 +340,18 @@ void HashMap<Key, Value, Hash>::print() const
             node = node->getNext();
         }
     }
+}
+
+template <class Key, class Value, class Hash>
+HashNode<Key, Value>* HashMap<Key, Value, Hash>::find(Key key) const
+{
+    unsigned long hashValue = this->hash(key);
+    HashNode<Key, Value> *curr = this->table[hashValue];
+
+    while (curr != nullptr && curr->getKey() != key)
+    {
+        curr = curr->getNext();
+    }
+
+    return curr;
 }

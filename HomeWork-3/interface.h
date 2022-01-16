@@ -1,6 +1,7 @@
 #include <iostream>
 #include <set>
 #include <string>
+#include <cmath>
 #include "hashMap.h"
 
 ///
@@ -34,9 +35,10 @@ public:
 
 	// You can add additional members if you need to
 
-	void removeOne(const std::string &word);
+	void remove(const std::string &word);
 	// void compareInPercentage(const ComparisonReport &report, const WordsMultiset& file1, const WordsMultiset& file2);
 	void print() const;
+	std::multiset<std::string> uniqueWords() const;
 
 private:
 	HashMap<std::string, int> hash;
@@ -109,16 +111,14 @@ std::multiset<std::string> WordsMultiset::words() const
 	return hash.keys();
 }
 
-void WordsMultiset::removeOne(const std::string &word)
+std::multiset<std::string> WordsMultiset::uniqueWords() const
 {
-	if (this->contains(word))
-	{
-		this->hash[word]--;
-		if (this->hash[word] == 0)
-		{
-			this->hash.remove(word);
-		}
-	}
+	return hash.uniqueKeys();
+}
+
+void WordsMultiset::remove(const std::string &word)
+{
+	this->hash.remove(word);
 }
 
 ComparisonReport Comparator::compare(std::istream &a, std::istream &b)
@@ -140,31 +140,41 @@ ComparisonReport Comparator::compare(std::istream &a, std::istream &b)
 		this->file2_words++;
 	}
 
-
-	for (std::string word : a_set.words())
+	for (std::string word : a_set.uniqueWords())
 	{
 		if (b_set.contains(word))
 		{
-			a_set.removeOne(word);
-			b_set.removeOne(word);
-			report.commonWords.add(word);
-			this->common_words++;
-		}
-		else
-		{
-			if (!report.uniqueWords[0].contains(word))
+			int a_count = a_set.countOf(word);
+			int b_count = b_set.countOf(word);
+			int commonWords = (a_count < b_count) ? a_count : b_count;
+			report.commonWords.add(word, commonWords);
+
+			this->common_words += commonWords;
+
+			int uniqueWords = a_count - b_count;
+			b_set.remove(word);
+			if (uniqueWords == 0)
+			{
+				continue;
+			}
+			else if (uniqueWords > 0)
 			{
 				report.uniqueWords[0].add(word);
 			}
+			else
+			{
+				report.uniqueWords[1].add(word);
+			}
+		}
+		else
+		{
+			report.uniqueWords[0].add(word);
 		}
 	}
 
-	for (std::string word : b_set.words())
+	for (std::string word : b_set.uniqueWords())
 	{
-		if (!report.uniqueWords[1].contains(word))
-		{
-			report.uniqueWords[1].add(word);
-		}
+		report.uniqueWords[1].add(word);
 	}
 
 	return report;
@@ -184,13 +194,12 @@ void Comparator::compareInPercentage(const ComparisonReport &report)
 	int percentageF1 = (this->common_words) * 100 / this->file1_words;
 	int percentageF2 = (this->common_words) * 100 / this->file2_words;
 
-
-	std::cout << "file1 contains " << this->file1_words << " words and "
-			  << this->common_words << " are also in file2 (" << percentageF1 << "%)"
+	std::cout << "file1 contains " 	<< this->file1_words 		<< " words and "
+			  << this->common_words << " are also in file2 (" 	<< percentageF1 << "%)"
 			  << std::endl;
 
-	std::cout << "file2 contains " << this->file2_words << " words and "
-			  << this->common_words << " are also in file1 (" << percentageF2 << "%)"
+	std::cout << "file2 contains " 	<< this->file2_words 		<< " words and "
+			  << this->common_words << " are also in file1 (" 	<< percentageF2 << "%)"
 			  << std::endl;
 	return;
 }

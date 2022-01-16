@@ -53,6 +53,5 @@ int main(int argc, char **argv)
     Comparator c;
     ComparisonReport report = c.compare(file1_stream, file2_stream);
     c.compareInPercentage(report);
-
     return 0;
 }
